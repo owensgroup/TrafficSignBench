@@ -13,7 +13,7 @@ class Bench:
 			"keras": KerasBench.KerasBench
 		}
 
-		self.root, trainImages, trainLabels, self.testImages, self.testLabels, self.class_num = DLHelper.getImageSets(args.root, (args.resize_side, args.resize_side), dataset=args.dataset, process=args.preprocessing, printing=args.printing)
+		self.root, trainImages, trainLabels, self.testImages, self.testLabels, self.class_num = DLHelper.getImageSets(args.root, (args.resize_side, args.resize_side), dataset=args.dataset, preprocessing=args.preprocessing, printing=args.printing)
 		self.x_train, self.x_valid, self.y_train, self.y_valid = ms.train_test_split(trainImages, trainLabels, test_size=0.2, random_state=542)
 
 	def bench(self):

@@ -199,22 +199,15 @@ def getDirFuncClassNum(root, dataset="GT"):
     return root, train_dir, test_dir, readTrafficSigns, class_num
 
 
-def getImageSets(root, resize_size, dataset="GT", process='0', printing=True):
+def getImageSets(root, resize_size, dataset="GT", preprocessing=None, printing=True):
     root, train_dir, test_dir, readTrafficSigns, class_num = getDirFuncClassNum(root, dataset)
     trainImages, trainLabels, testImages, testLabels = None, None, None, None
 
-    if process == '0':
-        process = None
-    elif process == '1':
-        process = "1sigma"
-    elif process == '2':
-        process = "2sigma"
-    else: # '3'
-        process = "clahe"
+    preprocessing = preprocessing if (preprocessing is not None) else "original"
 
     ## If pickle file exists, read the file
-    if os.path.isfile(root + "/processed_images_{}_{}_{}_{}.pkl".format(resize_size[0], resize_size[1], dataset, (process if (process is not None) else "original"))):
-        f = open(root + "/processed_images_{}_{}_{}_{}.pkl".format(resize_size[0], resize_size[1], dataset, (process if (process is not None) else "original")), 'rb')
+    if os.path.isfile(root + "/processed_images_{}_{}_{}_{}.pkl".format(resize_size[0], resize_size[1], dataset, preprocessing)):
+        f = open(root + "/processed_images_{}_{}_{}_{}.pkl".format(resize_size[0], resize_size[1], dataset, preprocessing), 'rb')
         trainImages = cPickle.load(f, encoding="latin1")
         trainLabels = cPickle.load(f, encoding="latin1")
         testImages = cPickle.load(f, encoding="latin1")
@@ -222,17 +215,17 @@ def getImageSets(root, resize_size, dataset="GT", process='0', printing=True):
         f.close()
     ## Else, read images and write to the pickle file
     else:
-        print("Process {} dataset with {} and size {}, saved to {}.".format(dataset, process, resize_size, root))
+        print("Process {} dataset with {} and size {}, saved to {}.".format(dataset, preprocessing, resize_size, root))
         start = time.time()
         if dataset == "GT" or dataset == "Belgium":
-            trainImages, trainLabels = readTrafficSigns(train_dir, resize_size, process, True)
-            testImages, testLabels = readTrafficSigns(test_dir, resize_size, process, False)
+            trainImages, trainLabels = readTrafficSigns(train_dir, resize_size, preprocessing, True)
+            testImages, testLabels = readTrafficSigns(test_dir, resize_size, preprocessing, False)
         else: # LISA
-            trainImages, trainLabels, testImages, testLabels, class_num = readTrafficSigns(root, resize_size, process)
+            trainImages, trainLabels, testImages, testLabels, class_num = readTrafficSigns(root, resize_size, preprocessing)
             print(class_num)
         print("Training and testing Image preprocessing finished in {:.2f} seconds".format(time.time() - start))
         
-        f = open(root + "/processed_images_{}_{}_{}_{}.pkl".format(resize_size[0], resize_size[1], dataset, (process if (process is not None) else "original")), 'wb')
+        f = open(root + "/processed_images_{}_{}_{}_{}.pkl".format(resize_size[0], resize_size[1], dataset, preprocessing), 'wb')
 
         for obj in [trainImages, trainLabels, testImages, testLabels]:
             cPickle.dump(obj, f, protocol=cPickle.HIGHEST_PROTOCOL)
