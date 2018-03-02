@@ -5,12 +5,14 @@ from sklearn import model_selection as ms
 import time, sys, DLHelper
 
 import KerasBench
+import MxnetBench
 
 class Bench:
 	def __init__(self, args):
 		self.args = args
 		self.bs = {
-			"keras": KerasBench.KerasBench
+			"keras": KerasBench.KerasBench,
+			"mxnet": MxnetBench.MxnetBench
 		}
 
 		self.root, trainImages, trainLabels, self.testImages, self.testLabels, self.class_num = DLHelper.getImageSets(args.root, (args.resize_side, args.resize_side), dataset=args.dataset, preprocessing=args.preprocessing, printing=args.printing)
