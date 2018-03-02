@@ -4,15 +4,17 @@ import matplotlib.pyplot as plt
 from sklearn import model_selection as ms
 import time, sys, DLHelper
 
-import KerasBench
-import MxnetBench
+from KerasBench import KerasBench
+from MxnetBench import MxnetBench
+from PyTorchBench import PyTorchBench
 
 class Bench:
 	def __init__(self, args):
 		self.args = args
 		self.bs = {
-			"keras": KerasBench.KerasBench,
-			"mxnet": MxnetBench.MxnetBench
+			"keras": KerasBench,
+			"mxnet": MxnetBench,
+			"pytorch": PyTorchBench
 		}
 
 		self.root, trainImages, trainLabels, self.testImages, self.testLabels, self.class_num = DLHelper.getImageSets(args.root, (args.resize_side, args.resize_side), dataset=args.dataset, preprocessing=args.preprocessing, printing=args.printing)
