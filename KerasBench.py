@@ -16,7 +16,7 @@ from timeit import default_timer
 from importlib import reload
 import tensorflow as tf
 import os
-import keras_resnet
+import ResNet.keras_resnet
 
 # Function to dynamically change keras backend
 def set_keras_backend(backend):

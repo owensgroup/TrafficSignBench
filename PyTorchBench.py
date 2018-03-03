@@ -11,7 +11,7 @@ import torch.nn.init as torch_init
 from torchvision import datasets, transforms
 from torch.autograd import Variable
 from timeit import default_timer
-from pytorch_resnet import resnet
+from ResNet.pytorch_resnet import resnet
 
 class Flatten(torch.nn.Module):
     def forward(self, x):

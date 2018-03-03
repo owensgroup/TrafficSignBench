@@ -6,7 +6,7 @@ import time, sys, DLHelper
 import mxnet as mx
 import logging
 from timeit import default_timer
-from mxnet_resnet import get_symbol
+from ResNet.mxnet_resnet import get_symbol
 logging.getLogger().setLevel(logging.DEBUG)  # logging to stdout
 
 # class MxCustomInit(mx.initializer.Initializer):

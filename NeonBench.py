@@ -33,7 +33,7 @@ from neon.optimizers import (
 from neon.callbacks.callbacks import Callbacks, Callback, LossCallback
 from neon.data.dataiterator import ArrayIterator
 from timeit import default_timer
-from neon_resnet import resnet
+from ResNet.neon_resnet import resnet
 
 # This callback class is actually a mix of LossCallback and MetricCallback
 class SelfCallback(LossCallback):
