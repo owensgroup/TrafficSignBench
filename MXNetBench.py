@@ -40,7 +40,7 @@ class MxBatchCallback(object):
         # param.locals: Miscellaneous
 
 
-class MxnetBench:
+class MXNetBench:
     def __init__(self, args, root, x_train, x_valid, y_train, y_valid, testImages, testLabels, class_num):
 
         self.root = root

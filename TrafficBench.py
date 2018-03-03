@@ -5,18 +5,20 @@ from sklearn import model_selection as ms
 import time, sys, DLHelper
 
 from KerasBench import KerasBench
-from MxnetBench import MxnetBench
+from MXNetBench import MXNetBench
 from PyTorchBench import PyTorchBench
 from NeonBench import NeonBench
+from CNTKBench import CNTKBench
 
 class Bench:
 	def __init__(self, args):
 		self.args = args
 		self.bs = {
 			"keras": KerasBench,
-			"mxnet": MxnetBench,
+			"mxnet": MXNetBench,
 			"pytorch": PyTorchBench,
-			"neon": NeonBench
+			"neon": NeonBench,
+			"cntk": CNTKBench
 		}
 
 		self.root, trainImages, trainLabels, self.testImages, self.testLabels, self.class_num = DLHelper.getImageSets(args.root, (args.resize_side, args.resize_side), dataset=args.dataset, preprocessing=args.preprocessing, printing=args.printing)
@@ -45,7 +47,7 @@ if __name__ == "__main__":
 	parser.add_argument("--batch_size", help="Batch size", 
 		type=int, default=64)
 	parser.add_argument("--preprocessing", help="Preprocessing type", 
-		type=str, default="clahe")
+		type=str)
 	parser.add_argument("--printing", help="If print the result", 
 		type=bool, default=False)
 	parser.add_argument("-d", "--devices", action="append", help="Device (CPU/GPU)", 

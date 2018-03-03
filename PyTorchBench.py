@@ -261,7 +261,6 @@ class PyTorchBench:
                     self.valid(torch_model, optimizer, torch_valid_set, f, use_gpu, epoch)
                     
                 f['.']['time']['train']['end_time'][0] = time.time()
-                print(f['.']['time']['train']['end_time'][0] - f['.']['time']['train']['start_time'][0])
 
                 # Save total batch count
                 f['.']['config'].attrs["total_minibatches"] = batch_count

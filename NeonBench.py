@@ -174,7 +174,7 @@ class NeonBench:
 
     def benchmark(self):
         for d in self.devices:
-            b = d if "mkl" not in self.backends else "mkl"
+            b = d if ("mkl" not in self.backends) else "mkl"
             print("Use {} as backend.".format(b))
 
             # Set up backend
