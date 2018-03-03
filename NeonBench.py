@@ -142,8 +142,6 @@ class NeonBench:
         print("Training on Neon")
         print("**********************************")
 
-        print("Training on {}".format(self.backends))
-
     def constructCNN(self):
         layers = []
         if self.network_type == "idsia":
@@ -174,7 +172,7 @@ class NeonBench:
 
     def benchmark(self):
         for d in self.devices:
-            b = d if ("mkl" not in self.backends) else "mkl"
+            b = d if (self.backends is None) or ("mkl" not in self.backends) else "mkl"
             print("Use {} as backend.".format(b))
 
             # Set up backend
