@@ -7,6 +7,7 @@ import time, sys, DLHelper
 from KerasBench import KerasBench
 from MxnetBench import MxnetBench
 from PyTorchBench import PyTorchBench
+from NeonBench import NeonBench
 
 class Bench:
 	def __init__(self, args):
@@ -14,7 +15,8 @@ class Bench:
 		self.bs = {
 			"keras": KerasBench,
 			"mxnet": MxnetBench,
-			"pytorch": PyTorchBench
+			"pytorch": PyTorchBench,
+			"neon": NeonBench
 		}
 
 		self.root, trainImages, trainLabels, self.testImages, self.testLabels, self.class_num = DLHelper.getImageSets(args.root, (args.resize_side, args.resize_side), dataset=args.dataset, preprocessing=args.preprocessing, printing=args.printing)
