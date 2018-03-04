@@ -2,7 +2,7 @@
 A benchmark for deep learning frameworks on traffic sign recognition task
 
 ## Usage:
-* Download the code and change working directory to the folder
+* Download the code and change working directory to the folder.
 ```bash
 git clone https://github.com/owensgroup/TrafficSignBench.git
 cd TrafficSignBench
