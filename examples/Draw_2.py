@@ -17,10 +17,10 @@ if model not in ['resnet-20', 'resnet-32']:
 	raise Exception();
 data_path = root + "/saved_data/" + model
 device = sys.argv[3]
-fontsize = int(sys.argv[4])
-title = int(sys.argv[5])
+title = int(sys.argv[4])
 
 sizes = [32, 48, 64]
+fontsize = 16
 
 _ = DLHelper.create_dir(root, ["pics"], model, [device])
 

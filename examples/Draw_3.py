@@ -14,10 +14,10 @@ if dataset == "GT":
     root += "/GTSRB/try"
 data_path = root + "/saved_data/"
 device = sys.argv[2]
-fontsize = int(sys.argv[3])
 title = int(sys.argv[4])
 
 size = 48
+fontsize = 16
 models = ["IDSIA", "ResNet-20", "ResNet-32"]
 
 for model in models:
