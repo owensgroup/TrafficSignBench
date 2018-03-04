@@ -157,7 +157,7 @@ def readTrafficSigns_LISA(rootpath, size, process=None, training=True):
         under = os.listdir(folder)
         for u in under:
             if u.startswith("frame"):
-                folder = folder + '/' + u
+                folder = '/'.join([folder, u])
                 break
         annotations = folder + "/frameAnnotations.csv"
         gtFile = open(annotations)
@@ -176,19 +176,19 @@ def getDirFuncClassNum(root, dataset="GT"):
     train_dir, test_dir, readTrafficSigns = None, None, None
     class_num = -1
     if dataset == "GT":
-        root += "GTSRB/"
-        train_dir = root + "Final_Training/Images"
-        test_dir = root + "Final_Test/Images"
+        root = '/'.join([root, "GTSRB"])
+        train_dir = '/'.join([root, "Final_Training/Images"])
+        test_dir = '/'.join([root, "Final_Test/Images"])
         readTrafficSigns = readTrafficSigns_GT
         class_num = 43
     elif dataset == "Belgium":
-        root += "BelgiumTSC/"
-        train_dir = root + "Training"
-        test_dir = root + "Testing"
+        root = '/'.join([root, "BelgiumTSC"])
+        train_dir = '/'.join([root, "Training"])
+        test_dir = '/'.join([root, "Testing"])
         readTrafficSigns = readTrafficSigns_Belgium
         class_num = 62
     elif dataset == "LISA":
-        root += "LISA/"
+        root = '/'.join([root, "LISA"])
         train_dir = None
         test_dir = None
         readTrafficSigns = readTrafficSigns_LISA

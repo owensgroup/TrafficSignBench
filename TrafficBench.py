@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 from sklearn import model_selection as ms
 import time, sys, DLHelper
 
-from KerasBench import KerasBench
-from MXNetBench import MXNetBench
-from PyTorchBench import PyTorchBench
-from NeonBench import NeonBench
-from CNTKBench import CNTKBench
+from Benchmarks.KerasBench import KerasBench
+from Benchmarks.MXNetBench import MXNetBench
+from Benchmarks.PyTorchBench import PyTorchBench
+from Benchmarks.NeonBench import NeonBench
+# from Benchmarks.CNTKBench import CNTKBench
 
 class Bench:
 	def __init__(self, args):
@@ -17,8 +17,8 @@ class Bench:
 			"keras": KerasBench,
 			"mxnet": MXNetBench,
 			"pytorch": PyTorchBench,
-			"neon": NeonBench,
-			"cntk": CNTKBench
+			"neon": NeonBench
+			# "cntk": CNTKBench
 		}
 
 		self.root, trainImages, trainLabels, self.testImages, self.testLabels, self.class_num = DLHelper.getImageSets(args.root, (args.resize_side, args.resize_side), dataset=args.dataset, preprocessing=args.preprocessing, printing=args.printing)
