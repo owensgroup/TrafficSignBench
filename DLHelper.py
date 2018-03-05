@@ -176,7 +176,7 @@ def getDirFuncClassNum(root, dataset="GT"):
     train_dir, test_dir, readTrafficSigns = None, None, None
     class_num = -1
     if dataset == "GT":
-        root = '/'.join([root, "GTSRB"])
+        root = '/'.join([root, "GTSRB/"])
         train_dir = '/'.join([root, "Final_Training/Images"])
         test_dir = '/'.join([root, "Final_Test/Images"])
         readTrafficSigns = readTrafficSigns_GT
