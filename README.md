@@ -17,3 +17,6 @@ export DATASET_ROOT=/path/of/your/choice
 ```bash
 ./bench_script.sh
 ```
+## Bugs to be worked on
+* Neon support on CUDA 9 + cuDNN v7.
+* MXNet and PyTorch generate "out of memory" bugs when they are launched after any other frameworks.
