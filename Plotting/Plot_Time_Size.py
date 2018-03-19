@@ -25,6 +25,8 @@ args = parser.parse_args()
 
 root = args.root
 dataset = args.dataset
+if dataset == "GT":
+    root = root + "/GTSRB"
 model = args.network_type
 devices = args.devices
 title = args.title

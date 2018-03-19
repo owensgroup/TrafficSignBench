@@ -23,6 +23,8 @@ args = parser.parse_args()
 
 root = args.root
 dataset = args.dataset
+if dataset == "GT":
+    root = root + "/GTSRB"
 devices = args.devices
 title = args.title
 data_path = root + "/saved_data"

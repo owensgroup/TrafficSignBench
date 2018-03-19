@@ -8,7 +8,7 @@ from Benchmarks.KerasBench import KerasBench
 from Benchmarks.MXNetBench import MXNetBench
 from Benchmarks.PyTorchBench import PyTorchBench
 from Benchmarks.NeonBench import NeonBench
-from Benchmarks.CNTKBench import CNTKBench
+# from Benchmarks.CNTKBench import CNTKBench
 
 class Bench:
 	def __init__(self, args):
@@ -17,8 +17,8 @@ class Bench:
 			"keras": KerasBench,
 			"mxnet": MXNetBench,
 			"pytorch": PyTorchBench,
-			"neon": NeonBench,
-			"cntk": CNTKBench
+			"neon": NeonBench
+			# "cntk": CNTKBench
 		}
 
 		# Construct training and testing image sets

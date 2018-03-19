@@ -25,6 +25,8 @@ args = parser.parse_args()
 
 root = args.root
 dataset = args.dataset
+if dataset == "GT":
+    root = root + "/GTSRB"
 model = args.network_type.lower()
 size_xy = args.resize_side
 if model == "idsia":
@@ -80,11 +82,10 @@ for device in devices:
     for i in range(len(backends)):
         b = backends[i]
         filename = data_path+"/{}/callback_data_{}_{}_{}by{}_{}.h5".format(device, b, dataset, size_xy, size_xy, pre)
-        print(filename)
+        # print(filename)
         if not os.path.exists(filename):
             print("Data file for {} doesn't exist! Skip...".format(b))
             continue
-        print(filename)
 
         train_cost_batch = pd.DataFrame()
         train_cost_epoch = pd.DataFrame()
