@@ -1,22 +1,34 @@
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
-import h5py, sys, os
+import h5py, sys, os, argparse
+sys.path.append("..")
 import DLHelper
 # %matplotlib inline
 matplotlib.rcParams['figure.figsize'] = (10,8)
 
-if sys.platform == "darwin":
-    root = "/Users/moderato/Downloads"
-else:
-    root = "/home/zhongyilin/Desktop"
-dataset = sys.argv[1]
-if dataset == "GT":
-    root += "/GTSRB/try"
-model = sys.argv[2]
+parser = argparse.ArgumentParser()
+
+parser.add_argument("--root", help="Root directory of the dataset", 
+    type=str, required=True)
+parser.add_argument("--network_type", help="Type of neural network model", 
+    type=str, default="idsia")
+parser.add_argument("--resize_side", help="Size of the resized image", 
+    type=int, default=48)
+parser.add_argument("--dataset", help="Dataset", 
+    type=str, default="GT")
+parser.add_argument("-d", "--devices", action="append", help="Device (CPU/GPU)", 
+    type=str, required=True)
+parser.add_argument("--preprocessing", help="Preprocessing type", 
+        type=str)
+args = parser.parse_args()
+
+root = args.root
+dataset = args.dataset
+model = args.network_type
+size_xy = args.resize_side
+devices = args.devices
 data_path = root + "/saved_data/" + model
-size_xy = int(sys.argv[3])
-devices = sys.argv[4:]
 
 _ = DLHelper.create_dir(root, ["pics"], model, devices)
 
@@ -30,6 +42,8 @@ markers = {'neon_gpu': 'o', 'neon_mkl': 'x', 'keras_tensorflow': 'p',\
     'keras_theano': 'v', 'cntk': '+', 'mxnet': 's', 'pytorch': '*'}
 
 ylim_high = {'idsia': 4, 'self': 4, 'resnet-32': 3, 'resnet-20': 3}
+preprocessings = {'none': 0, '1-sigma': 1, '2-sigma': 2, 'clahe': 3}
+pre = preprocessings[args.preprocessing]
 
 pics_num = 5
 
@@ -62,6 +76,12 @@ for device in devices:
     # print(device)
     for i in range(len(backends)):
         b = backends[i]
+        filename = data_path+"/{}/callback_data_{}_{}_{}by{}_{}.h5".format(device, b, dataset, size_xy, size_xy, pre)
+        print(filename)
+        if not os.path.exists(filename):
+            print("Data file for {} doesn't exist! Skip...".format(b))
+            continue
+        print(filename)
 
         train_cost_batch = pd.DataFrame()
         train_cost_epoch = pd.DataFrame()
@@ -72,7 +92,7 @@ for device in devices:
         train_epoch_mark = dict()
         
         # print(data_path)
-        f = h5py.File(data_path+"/{}/callback_data_{}_{}_{}by{}_3.h5".format(device, b, dataset, size_xy, size_xy), "r")
+        f = h5py.File(filename, "r")
         actual_length = f['.']['config'].attrs['total_minibatches']
         
         train_cost_batch['{}_loss'.format(b)] = pd.Series(f['.']['cost']['train'][()]).iloc[0:actual_length] # Training loss per batch
@@ -151,8 +171,6 @@ for device in devices:
         
         f.close()
 
-    print('\n')
-
     axes[0].legend(loc=4)
     axes[0].axvline(fastest[1], linestyle='dashed', color='#777777')
     axes[0].text(fastest[1]*1.01, 1, "First Finished Training: " + fastest[0], size=12)
@@ -188,10 +206,10 @@ for device in devices:
     axes[3].set_xlabel('Time (s)')
     axes[3].set_ylabel('Validation Accuracy (%)')
 
-    figs[0].savefig(pics_path+"/train_loss_versus_time_{}by{}.png".format(size_xy, size_xy), dpi=figs[0].dpi)
-    figs[1].savefig(pics_path+"/train_and_valid_loss_versus_epoch_{}by{}.png".format(size_xy, size_xy), dpi=figs[1].dpi)
-    figs[2].savefig(pics_path+"/train_acc_versus_time_{}by{}.png".format(size_xy, size_xy), dpi=figs[2].dpi)
-    figs[3].savefig(pics_path+"/valid_acc_versus_time_{}by{}.png".format(size_xy, size_xy), dpi=figs[3].dpi)
-    figs[4].savefig(pics_path+"/train_and_valid_acc_versus_epoch_{}by{}.png".format(size_xy, size_xy), dpi=figs[4].dpi)
+    figs[0].savefig(pics_path+"/train_loss_versus_time_{}by{}_{}.png".format(size_xy, size_xy, pre), dpi=figs[0].dpi)
+    figs[1].savefig(pics_path+"/train_and_valid_loss_versus_epoch_{}by{}_{}.png".format(size_xy, size_xy, pre), dpi=figs[1].dpi)
+    figs[2].savefig(pics_path+"/train_acc_versus_time_{}by{}_{}.png".format(size_xy, size_xy, pre), dpi=figs[2].dpi)
+    figs[3].savefig(pics_path+"/valid_acc_versus_time_{}by{}_{}.png".format(size_xy, size_xy, pre), dpi=figs[3].dpi)
+    figs[4].savefig(pics_path+"/train_and_valid_acc_versus_epoch_{}by{}_{}.png".format(size_xy, size_xy, pre), dpi=figs[4].dpi)
     
-    plt.show()
+    # plt.show()

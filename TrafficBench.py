@@ -2,7 +2,7 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import model_selection as ms
-import time, sys, DLHelper
+import time, sys, DLHelper, gc
 
 from Benchmarks.KerasBench import KerasBench
 from Benchmarks.MXNetBench import MXNetBench
@@ -29,6 +29,10 @@ class Bench:
 			bm = self.bs.get(framework.lower(), "%s isn't a valid framework!".format(framework))
 			b = bm(self.args, self.root, self.x_train, self.x_valid, self.y_train, self.y_valid, self.testImages, self.testLabels, self.class_num)
 			b.benchmark()
+			# Release GPU memory
+			del b
+			gc.collect()
+
 
 
 if __name__ == "__main__":
