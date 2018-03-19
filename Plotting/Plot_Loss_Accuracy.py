@@ -25,8 +25,10 @@ args = parser.parse_args()
 
 root = args.root
 dataset = args.dataset
-model = args.network_type
+model = args.network_type.lower()
 size_xy = args.resize_side
+if model == "idsia":
+    size_xy = 48
 devices = args.devices
 data_path = root + "/saved_data/" + model
 
@@ -54,6 +56,7 @@ for device in devices:
     axes = [None] * pics_num
     table = []
 
+    # Prepare titles and plot layouts
     subplots_num = (2, 3) if device == 'gpu' else (3, 3)
     figs[0] = plt.figure()
     axes[0] = figs[0].add_subplot(1,1,1)
@@ -171,6 +174,7 @@ for device in devices:
         
         f.close()
 
+    # Add labels, grids, legends, etc
     axes[0].legend(loc=4)
     axes[0].axvline(fastest[1], linestyle='dashed', color='#777777')
     axes[0].text(fastest[1]*1.01, 1, "First Finished Training: " + fastest[0], size=12)
@@ -206,6 +210,7 @@ for device in devices:
     axes[3].set_xlabel('Time (s)')
     axes[3].set_ylabel('Validation Accuracy (%)')
 
+    # Save plots
     figs[0].savefig(pics_path+"/train_loss_versus_time_{}by{}_{}.png".format(size_xy, size_xy, pre), dpi=figs[0].dpi)
     figs[1].savefig(pics_path+"/train_and_valid_loss_versus_epoch_{}by{}_{}.png".format(size_xy, size_xy, pre), dpi=figs[1].dpi)
     figs[2].savefig(pics_path+"/train_acc_versus_time_{}by{}_{}.png".format(size_xy, size_xy, pre), dpi=figs[2].dpi)

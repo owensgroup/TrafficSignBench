@@ -153,15 +153,6 @@ class NeonBench:
             layers.append(Pooling(2, op="max", strides=2, name="neon_pool3"))
             layers.append(Affine(nout=200, init=Kaiming(local=False), bias=Constant(0.0), activation=Rectlin(), name="neon_fc1"))
             layers.append(Affine(nout=self.class_num, init=Kaiming(local=False), bias=Constant(0.0), activation=Softmax(), name="neon_fc2"))
-        elif self.network_type == "self":
-            layers.append(Conv((5, 5, 64), strides=2, padding=2, init=Kaiming(), bias=Constant(0.0), activation=Rectlin(), name="Conv1"))
-            layers.append(Pooling(2, op="max", strides=2, name="neon_pool1"))
-            layers.append(Conv((3, 3, 512), strides=1, padding=1, init=Kaiming(), bias=Constant(0.0), activation=Rectlin(), name="Conv2"))
-            layers.append(Pooling(2, op="max", strides=2, name="neon_pool2"))
-        #     layers.append(Pooling(5, op="avg", name="neon_global_pool"))
-            layers.append(Affine(nout=2048, init=Kaiming(local=False), bias=Constant(0.0), activation=Rectlin(), name="neon_fc1"))
-            layers.append(neon_Dropout(keep=0.5, name="neon_dropout1"))
-            layers.append(Affine(nout=self.class_num, init=Kaiming(local=False), bias=Constant(0.0), activation=Softmax(), name="neon_fc2"))
         elif self.network_type == "resnet-56":
             layers = resnet(9, self.class_num, int(resize_size[0]/4)) # 6*9 + 2 = 56
         elif self.network_type == "resnet-32":
@@ -179,7 +170,7 @@ class NeonBench:
             # backend: 'cpu' for single cpu, 'mkl' for cpu using mkl library, and 'gpu' for gpu
             be = gen_backend(backend=b, batch_size=self.batch_size, rng_seed=542, datatype=np.float32)
 
-            # Make iterators
+            # Prepare training/validation/testing sets
             neon_train_set = ArrayIterator(X=np.asarray([t.flatten().astype('float32')/255 for t in self.x_train]), y=np.asarray(self.y_train), make_onehot=True, nclass=self.class_num, lshape=(3, self.resize_size[0], self.resize_size[1]))
             neon_valid_set = ArrayIterator(X=np.asarray([t.flatten().astype('float32')/255 for t in self.x_valid]), y=np.asarray(self.y_valid), make_onehot=True, nclass=self.class_num, lshape=(3, self.resize_size[0], self.resize_size[1]))
             neon_test_set = ArrayIterator(X=np.asarray([t.flatten().astype('float32')/255 for t in self.testImages]), y=np.asarray(self.testLabels), make_onehot=True, nclass=self.class_num, lshape=(3, self.resize_size[0], self.resize_size[1]))

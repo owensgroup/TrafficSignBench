@@ -69,6 +69,7 @@ for device in devices:
 
 	backends = gpu_backends if device == "gpu" else cpu_backends
 
+	# Plot average batch training time
 	for idy, b in enumerate(backends):
 		ts = []
 		for size in sizes:
@@ -85,6 +86,7 @@ for device in devices:
 		axes[0].plot(range(3), ts, marker=markers[b], color=colors[b], label=correct_name[b])
 		axes[1].bar([-0.2 + x + idy*0.1 for x in range(len(sizes))], ts, 0.1, color=colors[b], label=correct_name[b])
 
+	# Add labels, grids, legends, etc
 	handles, labels = axes[0].get_legend_handles_labels()
 	axes[0].legend(handles, labels, loc=4, fontsize=fontsize)
 	axes[0].yaxis.grid(linestyle='dashdot')
@@ -107,6 +109,7 @@ for device in devices:
 
 	plt.tight_layout()
 
+	# Save plots
 	pics_path = root + "/pics/" + model + "/" + device
 	figs[0].savefig(pics_path+"/batch_training_time_all_input_sizes_plot_{}_{}.png".format(model, device), dpi=figs[0].dpi)
 	figs[1].savefig(pics_path+"/batch_training_time_all_input_sizes_bar_{}_{}.png".format(model, device), dpi=figs[1].dpi)

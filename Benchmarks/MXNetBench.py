@@ -109,7 +109,7 @@ class MXNetBench:
             self.mx_softmax = get_symbol(self.class_num, 20, "{},{},{}".format(3, resize_size[0], resize_size[1]))
 
     def benchmark(self):
-        # Prepare image sets
+        # Prepare training/validation/testing sets
         # batch size = (batch, 3, size_x, size_y)
         mx_train_x = mx.nd.array([i.swapaxes(0,2).astype("float32")/255 for i in self.x_train])
         mx_valid_x = mx.nd.array([i.swapaxes(0,2).astype("float32")/255 for i in self.x_valid])

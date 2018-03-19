@@ -149,7 +149,7 @@ class KerasBench:
             self.keras_model = keras_resnet.resnet_v1((self.resize_size[0], self.resize_size[1], 3), 20, num_classes=self.class_num)
 
     def benchmark(self):
-        # Load and process images
+        # Prepare training/validation/testing sets
         keras_train_x = np.vstack([np.expand_dims(image.img_to_array(x), axis=0).astype('float32')/255 for x in self.x_train]).astype('float32')
         keras_valid_x = np.vstack([np.expand_dims(image.img_to_array(x), axis=0).astype('float32')/255 for x in self.x_valid]).astype('float32')
         keras_test_x = np.vstack([np.expand_dims(image.img_to_array(x), axis=0).astype('float32')/255 for x in self.testImages]).astype('float32')
