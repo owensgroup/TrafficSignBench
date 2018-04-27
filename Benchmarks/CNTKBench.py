@@ -162,7 +162,7 @@ class CNTKBench:
                     f['.']['cost']['train'][batch_count-1] = np.float32(training_loss)
                     f['.']['accuracy']['train'][batch_count-1] = np.float32((1.0 - eval_error) * 100.0)
 
-                    if i % 30 == 0: # Print per 50 batches
+                    if i % 30 == 0: # Print per 30 batches
                         print("Epoch: {0}, Minibatch: {1}, Loss: {2:.4f}, Error: {3:.2f}%".format(epoch, i, training_loss, eval_error * 100.0))
 
                 # Save batch marker

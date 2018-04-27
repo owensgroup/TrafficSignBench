@@ -8,6 +8,7 @@ from Benchmarks.KerasBench import KerasBench
 from Benchmarks.MXNetBench import MXNetBench
 from Benchmarks.PyTorchBench import PyTorchBench
 from Benchmarks.NeonBench import NeonBench
+from Benchmarks.TensorflowBench import TensorflowBench
 # from Benchmarks.CNTKBench import CNTKBench
 
 class Bench:
@@ -17,7 +18,8 @@ class Bench:
 			"keras": KerasBench,
 			"mxnet": MXNetBench,
 			"pytorch": PyTorchBench,
-			"neon": NeonBench
+			"neon": NeonBench,
+			"tensorflow": TensorflowBench
 			# "cntk": CNTKBench
 		}
 
