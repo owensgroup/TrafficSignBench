@@ -96,7 +96,7 @@ class CNTKBench:
         cntk_cost = Softmax(self.cntk_model, cntk_output)
         cntk_error = ClassificationError(self.cntk_model, cntk_output)
 
-        # Construct data
+        # Prepare training/validation/testing sets
         cntk_train_x = np.ascontiguousarray(np.vstack([np.expand_dims(x, axis=0).transpose([0,3,1,2]).astype('float32')/255 for x in self.x_train]), dtype=np.float32)
         cntk_valid_x = np.ascontiguousarray(np.vstack([np.expand_dims(x, axis=0).transpose([0,3,1,2]).astype('float32')/255 for x in self.x_valid]), dtype=np.float32)
         cntk_test_x = np.ascontiguousarray(np.vstack([np.expand_dims(x, axis=0).transpose([0,3,1,2]).astype('float32')/255 for x in self.testImages]), dtype=np.float32)

@@ -98,6 +98,7 @@ def readTrafficSigns_GT(rootpath, size, process=None, training=True):
 
     return images, labels
 
+# Function to read the Belgium TSC datasets
 def readTrafficSigns_Belgium(rootpath, size, process=None, training=True):
     '''Reads traffic sign data for German Traffic Sign Recognition Benchmark.
 
@@ -119,6 +120,7 @@ def readTrafficSigns_Belgium(rootpath, size, process=None, training=True):
 
     return images, labels
 
+# Function to read categories of the LISA dataset
 def readLISACategories(rootpath):
     # Read categories
     f = open("{}categories.txt".format(rootpath))
@@ -139,6 +141,7 @@ def readLISACategories(rootpath):
     f.close()
     return class_match, class_num
 
+# Function to read the LISA dataset
 def readTrafficSigns_LISA(rootpath, size, process=None, training=True):
     class_match, class_num = readLISACategories(rootpath)
 
@@ -172,11 +175,12 @@ def readTrafficSigns_LISA(rootpath, size, process=None, training=True):
 
     return trainImages, trainLabels, testImages, testLabels, class_num
 
+# Get the directory and number of classes for different image sets
 def getDirFuncClassNum(root, dataset="GT"):
     train_dir, test_dir, readTrafficSigns = None, None, None
     class_num = -1
     if dataset == "GT":
-        root = '/'.join([root, "GTSRB"])
+        root = '/'.join([root, "GTSRB/"])
         train_dir = '/'.join([root, "Final_Training/Images"])
         test_dir = '/'.join([root, "Final_Test/Images"])
         readTrafficSigns = readTrafficSigns_GT
@@ -198,7 +202,7 @@ def getDirFuncClassNum(root, dataset="GT"):
 
     return root, train_dir, test_dir, readTrafficSigns, class_num
 
-
+# Get preprocessed image sets
 def getImageSets(root, resize_size, dataset="GT", preprocessing=None, printing=True):
     root, train_dir, test_dir, readTrafficSigns, class_num = getDirFuncClassNum(root, dataset)
     trainImages, trainLabels, testImages, testLabels = None, None, None, None
@@ -242,6 +246,7 @@ def getImageSets(root, resize_size, dataset="GT", preprocessing=None, printing=T
 
     return root, trainImages, trainLabels, testImages, testLabels, class_num
 
+# h5 files initialization
 def init_h5py(filename, epoch_num, max_total_batch):
     f = h5py.File(filename, 'w')
         
@@ -291,6 +296,7 @@ def init_h5py(filename, epoch_num, max_total_batch):
 
     return f
 
+# Create directories for files/plots saving
 def create_dir(current_dir, subs, model, devices):
     for sub in subs:
         path = os.path.join(current_dir, sub)

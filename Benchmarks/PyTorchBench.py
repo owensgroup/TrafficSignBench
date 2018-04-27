@@ -17,6 +17,7 @@ class Flatten(torch.nn.Module):
     def forward(self, x):
         return x.view(x.size(0), -1)
 
+# Construction of the IDSIA model
 class IDSIANet(torch.nn.Module):
     def __init__(self, class_num):
         super(IDSIANet, self).__init__()
@@ -57,41 +58,6 @@ class IDSIANet(torch.nn.Module):
         x = x.view(-1, 250*4*4)
         return self.csf.forward(x)
 
-class ConvNet(torch.nn.Module):
-    def __init__(self):
-        super(ConvNet, self).__init__()
-
-        # Build model
-        self.conv = torch.nn.Sequential()
-        self.conv.add_module("torch_conv1", torch.nn.Conv2d(3, 64, kernel_size=(5, 5), stride=2, padding=2))
-        self.conv.add_module("torch_pool1", torch.nn.MaxPool2d(kernel_size=2))
-        self.conv.add_module("torch_relu1", torch.nn.ReLU())
-        self.conv.add_module("torch_conv2", torch.nn.Conv2d(64, 256, kernel_size=(3, 3), stride=1, padding=1))
-        self.conv.add_module("torch_pool2", torch.nn.MaxPool2d(kernel_size=2))
-        self.conv.add_module("torch_relu2", torch.nn.ReLU())
-        self.conv.add_module("torch_flatten", Flatten())
-
-        self.csf = torch.nn.Sequential()
-        self.csf.add_module("torch_fc1", torch.nn.Linear(256*6*6, 2048))
-        self.csf.add_module("torch_relu3", torch.nn.ReLU())
-        self.csf.add_module("torch_dropout1", torch.nn.Dropout(0.5))
-        self.csf.add_module("torch_fc2", torch.nn.Linear(2048, self.class_num))
-        
-        # Initialize conv layers and fc layers
-        torch_init.normal(self.conv.state_dict()["torch_conv1.weight"], mean=0, std=0.01)
-        torch_init.constant(self.conv.state_dict()["torch_conv1.bias"], 0.0)
-        torch_init.normal(self.conv.state_dict()["torch_conv2.weight"], mean=0, std=0.01)
-        torch_init.constant(self.conv.state_dict()["torch_conv2.bias"], 0.0)
-        torch_init.normal(self.csf.state_dict()["torch_fc1.weight"], mean=0, std=0.01)
-        torch_init.constant(self.csf.state_dict()["torch_fc1.bias"], 0.0)
-        torch_init.normal(self.csf.state_dict()["torch_fc2.weight"], mean=0, std=0.01)
-        torch_init.constant(self.csf.state_dict()["torch_fc2.bias"], 0.0)
-
-    def forward(self, x):
-        x = self.conv.forward(x)
-        x = x.view(-1, 256*6*6)
-        return self.csf.forward(x)
-
 class PyTorchBench:
     def __init__(self, args, root, x_train, x_valid, y_train, y_valid, testImages, testLabels, class_num):
 
@@ -123,16 +89,12 @@ class PyTorchBench:
         print("Training on PyTorch")
         print("**********************************")
 
-
+    # Construct the CNN model
     def constructCNN(self, gpu=True):
         if self.network_type == "idsia":
             self.torch_model_cpu = IDSIANet(self.class_num)
             if gpu:
                 self.torch_model_gpu = IDSIANet(self.class_num).cuda()
-        elif self.network_type == "self":
-            self.torch_model_cpu = ConvNet()
-            if gpu:
-                self.torch_model_gpu = ConvNet().cuda()
         elif self.network_type == 'resnet-56':
             self.torch_model_cpu = resnet(depth=56, num_classes=self.class_num)
             if gpu:
@@ -146,6 +108,7 @@ class PyTorchBench:
             if gpu:
                 self.torch_model_gpu = resnet(depth=20, num_classes=self.class_num).cuda()
 
+    # Function for training the image set
     def train(self, torch_model, optimizer, train_set, f, batch_count, gpu=False, epoch=None):
         if gpu:
             torch_model.cuda()
@@ -187,6 +150,7 @@ class PyTorchBench:
 
         return batch_count
 
+    # Function for image set validation
     def valid(self, torch_model, optimizer, valid_set, f, gpu = False, epoch = None):
         torch_model.eval() # Set the model to testing mode
         valid_loss = 0
@@ -220,6 +184,7 @@ class PyTorchBench:
 
     def benchmark(self):
 
+        # Prepare training/validation/testing sets
         torch_train_x = torch.stack([torch.Tensor(i.swapaxes(0,2).astype("float32")/255) for i in self.x_train])
         torch_train_y = torch.LongTensor(self.y_train)
         torch_valid_x = torch.stack([torch.Tensor(i.swapaxes(0,2).astype("float32")/255) for i in self.x_valid])
