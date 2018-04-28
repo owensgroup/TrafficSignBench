@@ -156,11 +156,12 @@ class TensorflowBench:
 		f = DLHelper.init_h5py(filename, self.epoch_num, train_batch_num * self.epoch_num)
 
 		x = tf.placeholder(tf.float32, shape=[None, self.resize_size[0], self.resize_size[1], 3])
-		labels = tf.placeholder(tf.float32, shape=[None, self.class_num])
-		logits = tf.cast(self.tensorflow_model(x, True), tf.float32)
-		tensorflow_cost = tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=labels)
+		training = tf.placeholder(tf.bool)
+		y = tf.placeholder(tf.float32, shape=[None, self.class_num])
+		logits = tf.cast(self.tensorflow_model(x, training), tf.float32)
+		tensorflow_cost = tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y)
 		loss = tf.reduce_mean(tensorflow_cost)
-		accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(logits, 1), tf.argmax(labels, 1)), tf.float32))
+		accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(logits, 1), tf.argmax(y, 1)), tf.float32))
 		tensorflow_optimizer = tf.train.MomentumOptimizer(learning_rate=0.01, momentum=0.9).minimize(loss)
 
 
@@ -172,26 +173,20 @@ class TensorflowBench:
 				f['.']['time']['train']['start_time'][0] = time.time()
 
 				for epoch in range(0, self.epoch_num):
+					is_training = True
 
 					shuffled_indices = list(range(0, len(self.x_train)))
 					random.shuffle(shuffled_indices)
 
-					for i in range(0, train_batch_num):
+					for i in range(0, train_batch_count):
 						# Get data
 						indices = shuffled_indices[i*self.batch_size:(i+1)*self.batch_size]
-						features = tf.cast(tensorflow_train_x[indices, :, :, :], tf.float32)
-						labels = tf.cast(tensorflow_train_y.eval()[indices, :], tf.float32)
-
-						logits = tf.cast(self.tensorflow_model(features, True), tf.float32)
-
-						tensorflow_cost = tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=labels)
-						loss = tf.reduce_mean(tensorflow_cost)
-						accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(logits, 1), tf.argmax(labels, 1)), tf.float32))
-						tensorflow_optimizer = tf.train.MomentumOptimizer(learning_rate=0.01, momentum=0.9).minimize(loss)
+						features = tensorflow_train_x[indices, :, :, :]
+						labels = tensorflow_train_y.eval()[indices, :]
 
 						# Run
 						start = default_timer()
-						_, training_loss, training_acc = sess.run([tensorflow_optimizer, loss, accuracy])
+						_, training_loss, training_acc = sess.run([tensorflow_optimizer, loss, accuracy], feed_dict={x: features, training: is_training, y: labels})
 						train_batch_time = default_timer() - start
 
 						# Save data
@@ -209,7 +204,7 @@ class TensorflowBench:
 
 
 
-
+					is_training = False
 					shuffled_indices = list(range(0, len(self.x_valid)))
 					random.shuffle(shuffled_indices)
 
@@ -217,20 +212,13 @@ class TensorflowBench:
 					validation_acc = 0
 					for i in range(0, valid_batch_num):
 						indices = shuffled_indices[i*self.batch_size:(i+1)*self.batch_size]
-						features = tf.cast(tensorflow_valid_x[indices, :, :, :], tf.float32)
-						labels = tf.cast(tensorflow_valid_y.eval()[indices, :], tf.float32)
-
-						logits = tf.cast(self.tensorflow_model(features, False), tf.float32)
-
-						# No need to run the optimizer
-						tensorflow_cost = tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=labels)
-						loss = tf.reduce_mean(tensorflow_cost)
-						accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(logits, 1), tf.argmax(labels, 1)), tf.float32))
+						features = tensorflow_valid_x[indices, :, :, :]
+						labels = tensorflow_valid_y.eval()[indices, :]
 
 						# Get the loss and acc for this validation batch and accumulate
-						l, a = sess.run([loss, accuracy])
-						validation_loss += l * logits.shape.as_list()[0]
-						validation_acc += a * logits.shape.as_list()[0]
+						l, a = sess.run([loss, accuracy], feed_dict={x: features, training: is_training, y: labels})
+						validation_loss += l * labels.shape[0]
+						validation_acc += a * labels.shape[0]
 
 					validation_loss /= len(self.x_valid)
 					validation_acc /= len(self.x_valid)
@@ -254,17 +242,12 @@ class TensorflowBench:
 				test_acc = 0
 				for i in range(0, test_batch_num):
 					indices = shuffled_indices[i*self.batch_size:(i+1)*self.batch_size]
-					features = tf.cast(tensorflow_test_x[indices, :, :, :], tf.float32)
-					labels = tf.cast(tensorflow_test_y.eval()[indices, :], tf.float32)
-
-					logits = tf.cast(self.tensorflow_model(features, False), tf.float32)
-
-					# No need to run the loss and optimizer ops
-					accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(logits, 1), tf.argmax(labels, 1)), tf.float32))
+					features = tensorflow_test_x[indices, :, :, :]
+					labels = tensorflow_test_y.eval()[indices, :]
 
 					# Get the acc for this testing batch and accumulate
-					a = sess.run([accuracy])
-					test_acc += a[0] * logits.shape.as_list()[0]
+					a = sess.run([accuracy], feed_dict={x: features, training: is_training, y: labels})
+					test_acc += a[0] * labels.shape[0]
 
 				test_acc /= len(self.testImages)
 
