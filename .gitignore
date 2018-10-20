@@ -1,8 +1,8 @@
-__pycache__/*
-converted_model/*
-framework_comparison.ipynb
-ResNet/__pycache__/*
-table.py
-Benchmarks/__pycache__/*
-saved_models/*
-saved_data/*
+classification/__pycache__/*
+classification/converted_model/*
+classification/framework_comparison.ipynb
+classification/ResNet/__pycache__/*
+classification/table.py
+classification/Benchmarks/__pycache__/*
+classification/saved_models/*
+classification/saved_data/*
