@@ -154,11 +154,11 @@ class NeonBench:
             layers.append(Affine(nout=200, init=Kaiming(local=False), bias=Constant(0.0), activation=Rectlin(), name="neon_fc1"))
             layers.append(Affine(nout=self.class_num, init=Kaiming(local=False), bias=Constant(0.0), activation=Softmax(), name="neon_fc2"))
         elif self.network_type == "resnet-56":
-            layers = resnet(9, self.class_num, int(resize_size[0]/4)) # 6*9 + 2 = 56
+            layers = resnet(9, self.class_num, int(self.resize_size[0]/4)) # 6*9 + 2 = 56
         elif self.network_type == "resnet-32":
-            layers = resnet(5, self.class_num, int(resize_size[0]/4)) # 6*5 + 2 = 32
+            layers = resnet(5, self.class_num, int(self.resize_size[0]/4)) # 6*5 + 2 = 32
         elif self.network_type == "resnet-20":
-            layers = resnet(3, self.class_num, int(resize_size[0]/4)) # 6*3 + 2 = 20
+            layers = resnet(3, self.class_num, int(self.resize_size[0]/4)) # 6*3 + 2 = 20
         return layers
 
     def benchmark(self):

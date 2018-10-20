@@ -214,6 +214,7 @@ class PyTorchBench:
             optimizer = optim.SGD(torch_model.parameters(), lr=0.01, momentum=0.9)
 
             filename = "{}saved_data/{}/{}/callback_data_pytorch_{}_{}by{}_{}.h5".format(self.root, self.network_type, d, self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)
+            print(filename)
             f = DLHelper.init_h5py(filename, self.epoch_num, max_total_batch)
             try:
                 f['.']['time']['train']['start_time'][0] = time.time()

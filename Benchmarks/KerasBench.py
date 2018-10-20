@@ -142,7 +142,7 @@ class KerasBench:
             self.keras_model.add(Dense(self.class_num, activation="softmax", 
                 kernel_initializer='he_normal', bias_initializer='zeros', name="keras_fc2"))
         elif self.network_type == "resnet-56":
-            self.keras_model = keras_resnet.resnet_v1((self.resize_size[0], self.resize_size[1], 3), 50, num_classes=self.class_num)
+            self.keras_model = keras_resnet.resnet_v1((self.resize_size[0], self.resize_size[1], 3), 56, num_classes=self.class_num)
         elif self.network_type == "resnet-32":
             self.keras_model = keras_resnet.resnet_v1((self.resize_size[0], self.resize_size[1], 3), 32, num_classes=self.class_num)
         elif self.network_type == "resnet-20":

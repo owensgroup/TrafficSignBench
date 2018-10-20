@@ -4,3 +4,5 @@ framework_comparison.ipynb
 ResNet/__pycache__/*
 table.py
 Benchmarks/__pycache__/*
+saved_models/*
+saved_data/*

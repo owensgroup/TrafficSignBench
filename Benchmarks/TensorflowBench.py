@@ -74,10 +74,11 @@ class TensorflowBench:
 
 		self.tensorflow_model = None
 
-		_ = DLHelper.create_dir(root, ["saved_data", "saved_models"], self.network_type, self.devices)
+		_ = DLHelper.create_dir(".", ["saved_data", "saved_models"], self.network_type, self.devices)
 
 		print("**********************************")
 		print("Training on Tensorflow")
+		print("with {} and input size {}x{}".format(self.network_type, self.resize_size[0], self.resize_size[1]))
 		print("**********************************")
 
 	def constructCNN(self):
@@ -152,17 +153,22 @@ class TensorflowBench:
 		self.constructCNN()
 
 		# Create file to save data
-		filename = "{}/saved_data/{}/{}/callback_data_tensorflow_{}_{}by{}_{}.h5".format(self.root, self.network_type, self.devices[0], self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)
+		filename = "./saved_data/{}/{}/callback_data_tensorflow_{}_{}by{}_{}.h5".format(self.network_type, self.devices[0], self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)
 		f = DLHelper.init_h5py(filename, self.epoch_num, train_batch_num * self.epoch_num)
 
-		x = tf.placeholder(tf.float32, shape=[None, self.resize_size[0], self.resize_size[1], 3])
-		training = tf.placeholder(tf.bool)
-		y = tf.placeholder(tf.float32, shape=[None, self.class_num])
-		logits = tf.cast(self.tensorflow_model(x, training), tf.float32)
-		tensorflow_cost = tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y)
+		x = tf.placeholder(tf.float32, shape=[None, self.resize_size[0], self.resize_size[1], 3], name="{}/input_placeholder".format(self.network_type))
+		training = tf.placeholder_with_default(False, shape=(), name="{}/is_training".format(self.network_type))
+		y = tf.placeholder(tf.float32, shape=[None, self.class_num], name="{}/labels".format(self.network_type))
+		logits = tf.cast(self.tensorflow_model(x, training), tf.float32, name="{}/logits".format(self.network_type))
+		probs = tf.nn.softmax(logits, name="{}/probs".format(self.network_type))
+		tensorflow_cost = tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits, labels=y, name="{}/cost".format(self.network_type))
 		loss = tf.reduce_mean(tensorflow_cost)
-		accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(logits, 1), tf.argmax(y, 1)), tf.float32))
 		tensorflow_optimizer = tf.train.MomentumOptimizer(learning_rate=0.01, momentum=0.9).minimize(loss)
+		accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(logits, 1), tf.argmax(y, 1)), tf.float32), name="{}/accuracy".format(self.network_type))
+		update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+		with tf.control_dependencies(update_ops):
+			tensorflow_optimizer = tf.train.MomentumOptimizer(learning_rate=0.01, momentum=0.9).minimize(loss)
+		saver = tf.train.Saver()
 
 
 		with tf.Session() as sess:
@@ -178,7 +184,7 @@ class TensorflowBench:
 					shuffled_indices = list(range(0, len(self.x_train)))
 					random.shuffle(shuffled_indices)
 
-					for i in range(0, train_batch_count):
+					for i in range(0, train_batch_num):
 						# Get data
 						indices = shuffled_indices[i*self.batch_size:(i+1)*self.batch_size]
 						features = tensorflow_train_x[indices, :, :, :]
@@ -202,11 +208,12 @@ class TensorflowBench:
 					# Save batch marker
 					f['.']['time_markers']['minibatch'][epoch] = np.float32(train_batch_count)
 
-
-
 					is_training = False
 					shuffled_indices = list(range(0, len(self.x_valid)))
 					random.shuffle(shuffled_indices)
+
+					# print([n.name for n in tf.get_default_graph().as_graph_def().node])
+					# print(tf.get_default_graph().get_tensor_by_name('tf_conv2/kernel:0').eval())
 
 					validation_loss = 0
 					validation_acc = 0
@@ -217,9 +224,13 @@ class TensorflowBench:
 
 						# Get the loss and acc for this validation batch and accumulate
 						l, a = sess.run([loss, accuracy], feed_dict={x: features, training: is_training, y: labels})
+
+						# print(a)
 						validation_loss += l * labels.shape[0]
 						validation_acc += a * labels.shape[0]
 
+					# print("****************")
+					# print(tf.get_default_graph().get_tensor_by_name('tf_conv2/kernel:0').eval())
 					validation_loss /= len(self.x_valid)
 					validation_acc /= len(self.x_valid)
 
@@ -233,12 +244,10 @@ class TensorflowBench:
 				f['.']['config'].attrs["total_minibatches"] = train_batch_count
 				f['.']['time_markers'].attrs['minibatches_complete'] = train_batch_count
 
-
-
-
 				shuffled_indices = list(range(0, len(self.testImages)))
 				random.shuffle(shuffled_indices)
 
+				is_training = False
 				test_acc = 0
 				for i in range(0, test_batch_num):
 					indices = shuffled_indices[i*self.batch_size:(i+1)*self.batch_size]
@@ -255,6 +264,15 @@ class TensorflowBench:
 				f['.']['infer_acc']['accuracy'][0] = np.float32(test_acc * 100.0)
 				print("Accuracy score is %f" % test_acc)
 
+				node_list = [n.name for n in sess.graph_def.node]
+				# print(node_list)
+				output_pb_name = "./saved_models/{}/{}/tf_{}_{}by{}_{}.pb".format(self.network_type, self.devices[0], self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)
+				print("Output pb file to ", output_pb_name)
+				constant_graph = tf.graph_util.convert_variables_to_constants(sess=sess,
+					input_graph_def=sess.graph_def,
+					output_node_names=['{}/probs'.format(self.network_type)])
+				with tf.gfile.FastGFile(output_pb_name, mode='wb') as f:
+					f.write(constant_graph.SerializeToString())
 
 			except KeyboardInterrupt:
 				pass

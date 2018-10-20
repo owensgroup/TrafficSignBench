@@ -10,22 +10,22 @@ from ResNet.mxnet_resnet import get_symbol
 logging.getLogger().setLevel(logging.DEBUG)  # logging to stdout
 
 # class MxCustomInit(mx.initializer.Initializer):
-#     def __init__(self, idict):
-#         super(MxCustomInit, self).__init__()
-#         self.dict = idict
-#         np.random.seed(seed=1)
+#    def __init__(self, idict):
+#       super(MxCustomInit, self).__init__()
+#       self.dict = idict
+#       np.random.seed(seed=1)
 
-#     def _init_weight(self, name, arr):
-#         if name in self.dict.keys():
-#             dictPara = self.dict[name]
-#             for(k, v) in dictPara.items():
-#                 arr = np.random.normal(0, v, size=arr.shape)
+#    def _init_weight(self, name, arr):
+#       if name in self.dict.keys():
+#          dictPara = self.dict[name]
+#          for(k, v) in dictPara.items():
+#             arr = np.random.normal(0, v, size=arr.shape)
 
-#     def _init_bias(self, name, arr):
-#         if name in self.dict.keys():
-#             dictPara = self.dict[name]
-#             for(k, v) in dictPara.items():
-#                 arr[:] = v
+#    def _init_bias(self, name, arr):
+#       if name in self.dict.keys():
+#          dictPara = self.dict[name]
+#          for(k, v) in dictPara.items():
+#             arr[:] = v
 
 class MxBatchCallback(object):
     def __init__(self):
@@ -65,7 +65,7 @@ class MXNetBench:
         self.mx_softmax = None
         self.mx_model = None
 
-        _ = DLHelper.create_dir(root, ["saved_data", "saved_models"], self.network_type, self.devices)
+        _ = DLHelper.create_dir(".", ["saved_data", "saved_models"], self.network_type, self.devices)
 
         print("**********************************")
         print("Training on Mxnet")
@@ -102,11 +102,11 @@ class MXNetBench:
             mx_fc2 = mx.sym.FullyConnected(data = mx_drop, name='mx_fc2', num_hidden=self.class_num)
             self.mx_softmax = mx.sym.SoftmaxOutput(data = mx_fc2, name ='softmax')
         elif self.network_type == 'resnet-56':
-            self.mx_softmax = get_symbol(self.class_num, 56, "{},{},{}".format(3, resize_size[0], resize_size[1]))
+            self.mx_softmax = get_symbol(self.class_num, 56, "{},{},{}".format(3, self.resize_size[0], self.resize_size[1]))
         elif self.network_type == 'resnet-32':
-            self.mx_softmax = get_symbol(self.class_num, 32, "{},{},{}".format(3, resize_size[0], resize_size[1]))
+            self.mx_softmax = get_symbol(self.class_num, 32, "{},{},{}".format(3, self.resize_size[0], self.resize_size[1]))
         elif self.network_type == 'resnet-20':
-            self.mx_softmax = get_symbol(self.class_num, 20, "{},{},{}".format(3, resize_size[0], resize_size[1]))
+            self.mx_softmax = get_symbol(self.class_num, 20, "{},{},{}".format(3, self.resize_size[0], self.resize_size[1]))
 
     def benchmark(self):
         # Prepare training/validation/testing sets
@@ -142,11 +142,11 @@ class MXNetBench:
         # mx_cons_dict = {'constant': 0.0}
         # mx_init_dict = {}
         # for layer in self.mx_softmax.list_arguments():
-        #     hh = layer.split('_')
-        #     if hh[-1] == 'weight':
-        #         mx_init_dict[layer] = mx_nor_dict
-        #     elif hh[-1] == 'bias':
-        #         mx_init_dict[layer] = mx_cons_dict
+        #    hh = layer.split('_')
+        #    if hh[-1] == 'weight':
+        #       mx_init_dict[layer] = mx_nor_dict
+        #    elif hh[-1] == 'bias':
+        #       mx_init_dict[layer] = mx_cons_dict
         # print(mx_init_dict)
 
         for d in self.devices:
@@ -158,7 +158,7 @@ class MXNetBench:
                 self.mx_model = mx.mod.Module(context=mx.gpu(0), symbol=self.mx_softmax)
 
             max_total_batch = (len(self.x_train) // self.batch_size + 1) * self.epoch_num
-            filename = "{}/saved_data/{}/{}/callback_data_mxnet_{}_{}by{}_{}.h5".format(self.root, self.network_type, d, self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)
+            filename = "./saved_data/{}/{}/callback_data_mxnet_{}_{}by{}_{}.h5".format(self.network_type, d, self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)
             f = DLHelper.init_h5py(filename, self.epoch_num, max_total_batch)
 
             try:
@@ -189,10 +189,10 @@ class MXNetBench:
                         start = default_timer()
                         batch_count += 1
                         epoch_batch += 1
-                        self.mx_model.forward(batch, is_train=True)       # compute predictions
+                        self.mx_model.forward(batch, is_train=True)    # compute predictions
                         self.mx_model.update_metric(mx_metric, batch.label)  # accumulate prediction accuracy
                         self.mx_model.backward()                          # compute gradients
-                        self.mx_model.update()                            # update parameters
+                        self.mx_model.update()              # update parameters
 
                         # Save batch time
                         train_batch_time = default_timer() - start
@@ -230,8 +230,15 @@ class MXNetBench:
                 f['.']['infer_acc']['accuracy'][0] = np.float32(score[0][1] * 100.0)
                 print("Accuracy score is %f" % (score[0][1]))
 
-                self.mx_model.save_params("{}saved_models/{}/{}/mxnet_{}_{}by{}_{}.params".format(self.root, self.network_type, d, self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing))
-                self.mx_model._symbol.save("{}saved_models/{}/{}/mxnet_{}_{}by{}_{}.json".format(self.root, self.network_type, d, self.dataset, self.resize_size[0], self.resize_size[0], self.preprocessing))
+                self.mx_model.save_params("./saved_models/{}/{}/mxnet_{}_{}by{}_{}-{:04d}.params".format(self.network_type, d, self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing, self.epoch_num))
+                self.mx_model._symbol.save("./saved_models/{}/{}/mxnet_{}_{}by{}_{}-symbol.json".format(self.network_type, d, self.dataset, self.resize_size[0], self.resize_size[0], self.preprocessing))
+
+                dest = "./saved_models/{}/{}/".format(self.network_type, d)
+
+                _, arg_params, aux_params = mx.model.load_checkpoint("./saved_models/{}/{}/mxnet_{}_{}by{}_{}".format(self.network_type, d, self.dataset, self.resize_size[0], self.resize_size[0], self.preprocessing), self.epoch_num)
+
+                save_prefix = 'deploy_mxnet_{}_{}by{}_{}'.format(self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)
+                mx.model.save_checkpoint(dest + save_prefix, self.epoch_num, self.mx_softmax, arg_params, aux_params)
                 
             except KeyboardInterrupt:
                 pass
