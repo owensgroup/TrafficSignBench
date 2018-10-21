@@ -107,6 +107,7 @@ class KerasBench:
 
         print("**********************************")
         print("Training on Keras")
+        print("with {} and input size {}x{}".format(self.network_type, self.resize_size[0], self.resize_size[1]))
         print("**********************************")
 
         print("Training on {}".format(self.backends))
@@ -162,6 +163,9 @@ class KerasBench:
                 set_keras_backend(b)
                 max_total_batch = (len(self.x_train) // self.batch_size + 1) * self.epoch_num
 
+                # Common suffix
+                suffix = "keras_{}_{}_{}by{}_{}".format(b, self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)
+
                 # Build model
                 self.constructCNN()
 
@@ -171,9 +175,8 @@ class KerasBench:
                 keras_cost = "categorical_crossentropy"
                 self.keras_model.compile(loss=keras_cost, optimizer=keras_optimizer, metrics=["acc"])
 
-                checkpointer = ModelCheckpoint(filepath="{}saved_models/{}/{}/keras_{}_{}_{}by{}_{}_weights.hdf5".format(self.root, self.network_type, device, b, self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing),
-                                                   verbose=1, save_best_only=True)
-                losses = LossHistory("./saved_data/{}/{}/callback_data_keras_{}_{}_{}by{}_{}.h5".format(self.network_type, device, b, self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing), self.epoch_num, max_total_batch)
+                checkpointer = ModelCheckpoint(filepath="./saved_models/{}/{}/{}.hdf5".format(self.network_type, device, suffix), verbose=1, save_best_only=True)
+                losses = LossHistory("./saved_data/{}/{}/callback_data_{}.h5".format(self.network_type, device, suffix), self.epoch_num, max_total_batch)
 
                 start = time.time()
                 self.keras_model.fit(keras_train_x, keras_train_y,
@@ -181,7 +184,7 @@ class KerasBench:
                               epochs=self.epoch_num, batch_size=self.batch_size, callbacks=[checkpointer, losses], verbose=1, shuffle=True)
                 print("{} training finishes in {:.2f} seconds.".format(b, time.time() - start))
 
-                self.keras_model.load_weights("./saved_models/{}/{}/keras_{}_{}_{}by{}_{}_weights.hdf5".format(self.network_type, device, b, self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)) # Load the best model (not necessary the latest one)
+                self.keras_model.load_weights("./saved_models/{}/{}/{}.hdf5".format(self.network_type, device, suffix)) # Load the best model (not necessary the latest one)
                 keras_predictions = [np.argmax(self.keras_model.predict(np.expand_dims(feature, axis=0))) for feature in keras_test_x]
 
                 # report test accuracy
@@ -191,6 +194,6 @@ class KerasBench:
                 print('{} test accuracy: {:.1f}%'.format(b, keras_test_accuracy))
 
                 json_string = self.keras_model.to_json()
-                js = open("./saved_models/{}/{}/keras_{}_{}_{}by{}_{}_config.json".format(self.network_type, device, b, self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing), "w")
+                js = open("./saved_models/{}/{}/{}.json".format(self.network_type, device, suffix), "w")
                 js.write(json_string)
                 js.close()

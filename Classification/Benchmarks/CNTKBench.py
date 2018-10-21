@@ -47,6 +47,7 @@ class CNTKBench:
 
         print("**********************************")
         print("Training on CNTK")
+        print("with {} and input size {}x{}".format(self.network_type, self.resize_size[0], self.resize_size[1]))
         print("**********************************")
 
     def constructCNN(self, cntk_input):
@@ -89,6 +90,9 @@ class CNTKBench:
             self.cntk_model = cntk_resnet.create_model(cntk_input, 3, self.class_num) # 6*3 + 2 = 20
 
     def benchmark(self):
+        # Common suffix
+        suffix = "cntk_{}_{}by{}_{}".format(self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)
+
         # Construct model, io and metrics
         cntk_input = C.input_variable((3, self.resize_size[0], self.resize_size[1]), np.float32)
         cntk_output = C.input_variable((self.class_num), np.float32)
@@ -125,7 +129,7 @@ class CNTKBench:
         train_batch_count = len(self.x_train) // self.batch_size + 1
         valid_batch_count = len(self.x_valid) // self.batch_size + 1
         test_batch_count = len(self.testImages) // self.batch_size + 1
-        filename = "./saved_data/{}/{}/callback_data_cntk_{}_{}by{}_{}.h5".format(self.network_type, self.devices[0], self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)
+        filename = "./saved_data/{}/{}/callback_data_{}.h5".format(self.network_type, self.devices[0], suffix)
         f = DLHelper.init_h5py(filename, self.epoch_num, train_batch_count * self.epoch_num)
 
         # Start training
@@ -208,7 +212,7 @@ class CNTKBench:
             f['.']['infer_acc']['accuracy'][0] = np.float32((1.0 - test_error) * 100.0)
             print("Accuracy score is %f" % (1.0 - test_error))
 
-            self.cntk_model.save("./saved_models/{}/{}/cntk_{}_{}by{}_{}.pth".format(self.network_type, self.devices[0], self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing))
+            self.cntk_model.save("./saved_models/{}/{}/{}.pth".format(self.network_type, self.devices[0], suffix))
 
         except KeyboardInterrupt:
             pass

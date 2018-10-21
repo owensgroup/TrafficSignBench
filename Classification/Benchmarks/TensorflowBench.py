@@ -152,8 +152,11 @@ class TensorflowBench:
 		# Construct model instance
 		self.constructCNN()
 
+		# Common suffix
+		suffix = "tensorflow_{}_{}by{}_{}".format(self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)
+
 		# Create file to save data
-		filename = "./saved_data/{}/{}/callback_data_tensorflow_{}_{}by{}_{}.h5".format(self.network_type, self.devices[0], self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)
+		filename = "./saved_data/{}/{}/callback_data_{}.h5".format(self.network_type, self.devices[0], suffix)
 		f = DLHelper.init_h5py(filename, self.epoch_num, train_batch_num * self.epoch_num)
 
 		x = tf.placeholder(tf.float32, shape=[None, self.resize_size[0], self.resize_size[1], 3], name="{}/input_placeholder".format(self.network_type))
@@ -266,7 +269,7 @@ class TensorflowBench:
 
 				node_list = [n.name for n in sess.graph_def.node]
 				# print(node_list)
-				output_pb_name = "./saved_models/{}/{}/tf_{}_{}by{}_{}.pb".format(self.network_type, self.devices[0], self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)
+				output_pb_name = "./saved_models/{}/{}/{}.pb".format(self.network_type, self.devices[0], suffix)
 				print("Output pb file to ", output_pb_name)
 				constant_graph = tf.graph_util.convert_variables_to_constants(sess=sess,
 					input_graph_def=sess.graph_def,

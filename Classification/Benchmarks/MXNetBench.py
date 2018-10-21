@@ -69,6 +69,7 @@ class MXNetBench:
 
         print("**********************************")
         print("Training on Mxnet")
+        print("with {} and input size {}x{}".format(self.network_type, self.resize_size[0], self.resize_size[1]))
         print("**********************************")
 
     def constructCNN(self):
@@ -151,6 +152,10 @@ class MXNetBench:
 
         for d in self.devices:
             print("Using {}.".format(d))
+
+            # Common suffix
+            suffix = "mxnet_{}_{}by{}_{}".format(self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)
+
             # create a trainable module on CPU/GPU
             if d == 'cpu':
                 self.mx_model = mx.mod.Module(context=mx.cpu(), symbol=self.mx_softmax)
@@ -158,7 +163,7 @@ class MXNetBench:
                 self.mx_model = mx.mod.Module(context=mx.gpu(0), symbol=self.mx_softmax)
 
             max_total_batch = (len(self.x_train) // self.batch_size + 1) * self.epoch_num
-            filename = "./saved_data/{}/{}/callback_data_mxnet_{}_{}by{}_{}.h5".format(self.network_type, d, self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)
+            filename = "./saved_data/{}/{}/callback_data_{}.h5".format(self.network_type, d, suffix)
             f = DLHelper.init_h5py(filename, self.epoch_num, max_total_batch)
 
             try:
@@ -201,9 +206,11 @@ class MXNetBench:
                         # Save training loss
                         f['.']['cost']['train'][batch_count-1] = np.float32(mx_metric.get_name_value()[1][1])
                         f['.']['accuracy']['train'][batch_count-1] = np.float32(mx_metric.get_name_value()[0][1] * 100.0)
-                        print("Epoch: {}, batch: {}, accuracy: {:.3f}, loss: {:.6f}, batch time: {:.3f}s"\
-                            .format(epoch, epoch_batch-1, mx_metric.get_name_value()[0][1],\
-                                mx_metric.get_name_value()[1][1], train_batch_time))
+
+                        if epoch_batch-1 % 30 == 0: # Print per 30 batches
+                            print("Epoch: {}, batch: {}, accuracy: {:.3f}, loss: {:.6f}, batch time: {:.3f}s"\
+                                .format(epoch, epoch_batch-1, mx_metric.get_name_value()[0][1],\
+                                    mx_metric.get_name_value()[1][1], train_batch_time))
                     
                     # Save batch marker
                     f['.']['time_markers']['minibatch'][epoch] = np.float32(batch_count)
@@ -230,14 +237,14 @@ class MXNetBench:
                 f['.']['infer_acc']['accuracy'][0] = np.float32(score[0][1] * 100.0)
                 print("Accuracy score is %f" % (score[0][1]))
 
-                self.mx_model.save_params("./saved_models/{}/{}/mxnet_{}_{}by{}_{}-{:04d}.params".format(self.network_type, d, self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing, self.epoch_num))
-                self.mx_model._symbol.save("./saved_models/{}/{}/mxnet_{}_{}by{}_{}-symbol.json".format(self.network_type, d, self.dataset, self.resize_size[0], self.resize_size[0], self.preprocessing))
+                self.mx_model.save_params("./saved_models/{}/{}/{}-{:04d}.params".format(self.network_type, d, suffix, self.epoch_num))
+                self.mx_model._symbol.save("./saved_models/{}/{}/{}-symbol.json".format(self.network_type, d, suffix))
 
                 dest = "./saved_models/{}/{}/".format(self.network_type, d)
 
-                _, arg_params, aux_params = mx.model.load_checkpoint("./saved_models/{}/{}/mxnet_{}_{}by{}_{}".format(self.network_type, d, self.dataset, self.resize_size[0], self.resize_size[0], self.preprocessing), self.epoch_num)
+                _, arg_params, aux_params = mx.model.load_checkpoint("./saved_models/{}/{}/{}".format(self.network_type, d, suffix), self.epoch_num)
 
-                save_prefix = 'deploy_mxnet_{}_{}by{}_{}'.format(self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)
+                save_prefix = 'deploy_{}'.format(suffix)
                 mx.model.save_checkpoint(dest + save_prefix, self.epoch_num, self.mx_softmax, arg_params, aux_params)
                 
             except KeyboardInterrupt:

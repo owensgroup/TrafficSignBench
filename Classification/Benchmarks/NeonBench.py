@@ -140,6 +140,7 @@ class NeonBench:
 
         print("**********************************")
         print("Training on Neon")
+        print("with {} and input size {}x{}".format(self.network_type, self.resize_size[0], self.resize_size[1]))
         print("**********************************")
 
     def constructCNN(self):
@@ -165,6 +166,9 @@ class NeonBench:
         for d in self.devices:
             b = d if (self.backends is None) or ("mkl" not in self.backends) else "mkl"
             print("Use {} as backend.".format(b))
+
+            # Common suffix
+            suffix = "neon_{}_{}_{}by{}_{}".format(b, self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)
 
             # Set up backend
             # backend: 'cpu' for single cpu, 'mkl' for cpu using mkl library, and 'gpu' for gpu
@@ -198,7 +202,7 @@ class NeonBench:
             # self.neon_model.initialize(neon_train_set, neon_cost)
 
             # Callbacks: validate on validation set
-            callbacks = Callbacks(self.neon_model, eval_set=neon_valid_set, metric=Misclassification(3), output_file="./saved_data/{}/{}/callback_data_neon_{}_{}_{}by{}_{}.h5".format(self.network_type, d, b, self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing))
+            callbacks = Callbacks(self.neon_model, eval_set=neon_valid_set, metric=Misclassification(3), output_file="./saved_data/{}/{}/callback_data_{}.h5".format(self.network_type, d, suffix))
             callbacks.add_callback(SelfCallback(eval_set=neon_valid_set, test_set=neon_test_set, epoch_freq=1))
 
             # Fit
@@ -222,7 +226,7 @@ class NeonBench:
             # neon_error_top5 = self.neon_model.eval(neon_valid_set, metric=TopKMisclassification(5))*100
             # print('Top 5 Misclassification error = {:.1f}%. Finished in {:.2f} seconds.'.format(neon_error_top5[2], time.time() - start))
 
-            self.neon_model.save_params("./saved_models/{}/{}/neon_weights_{}_{}_{}by{}_{}.prm".format(self.network_type, d, b, self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing))
+            self.neon_model.save_params("./saved_models/{}/{}/{}.prm".format(self.network_type, d, suffix))
 
             # Print error on test set
             start = time.time()

@@ -9,7 +9,7 @@ cd TrafficSignBench
 ```
 * Prepare Dataset. Currently only the GTSRB dataset is supported.
 ```bash
-export DATASET_ROOT=/path/of/your/choice
+export DATA=/path/of/your/choice
 ./prepare_dataset.sh
 ```
 

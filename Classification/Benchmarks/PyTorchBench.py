@@ -42,16 +42,16 @@ class IDSIANet(torch.nn.Module):
         self.csf.add_module("torch_fc2", torch.nn.Linear(200, class_num))
         
         # Initialize conv layers and fc layers
-        torch_init.kaiming_normal(self.conv.state_dict()["torch_conv1.weight"])
-        torch_init.constant(self.conv.state_dict()["torch_conv1.bias"], 0.0)
-        torch_init.kaiming_normal(self.conv.state_dict()["torch_conv2.weight"])
-        torch_init.constant(self.conv.state_dict()["torch_conv2.bias"], 0.0)
-        torch_init.kaiming_normal(self.conv.state_dict()["torch_conv3.weight"])
-        torch_init.constant(self.conv.state_dict()["torch_conv3.bias"], 0.0)
-        torch_init.kaiming_normal(self.csf.state_dict()["torch_fc1.weight"])
-        torch_init.constant(self.csf.state_dict()["torch_fc1.bias"], 0.0)
-        torch_init.kaiming_normal(self.csf.state_dict()["torch_fc2.weight"])
-        torch_init.constant(self.csf.state_dict()["torch_fc2.bias"], 0.0)
+        torch_init.kaiming_normal_(self.conv.state_dict()["torch_conv1.weight"])
+        torch_init.constant_(self.conv.state_dict()["torch_conv1.bias"], 0.0)
+        torch_init.kaiming_normal_(self.conv.state_dict()["torch_conv2.weight"])
+        torch_init.constant_(self.conv.state_dict()["torch_conv2.bias"], 0.0)
+        torch_init.kaiming_normal_(self.conv.state_dict()["torch_conv3.weight"])
+        torch_init.constant_(self.conv.state_dict()["torch_conv3.bias"], 0.0)
+        torch_init.kaiming_normal_(self.csf.state_dict()["torch_fc1.weight"])
+        torch_init.constant_(self.csf.state_dict()["torch_fc1.bias"], 0.0)
+        torch_init.kaiming_normal_(self.csf.state_dict()["torch_fc2.weight"])
+        torch_init.constant_(self.csf.state_dict()["torch_fc2.bias"], 0.0)
 
     def forward(self, x):
         x = self.conv.forward(x)
@@ -87,6 +87,7 @@ class PyTorchBench:
 
         print("**********************************")
         print("Training on PyTorch")
+        print("with {} and input size {}x{}".format(self.network_type, self.resize_size[0], self.resize_size[1]))
         print("**********************************")
 
     # Construct the CNN model
@@ -122,7 +123,7 @@ class PyTorchBench:
             optimizer.zero_grad()
             output = torch_model(data)
             # output = torch_model.forward(data)
-            cost = torch.nn.CrossEntropyLoss(size_average=True)
+            cost = torch.nn.CrossEntropyLoss(reduction='elementwise_mean')
             train_loss = cost(output, target)
             train_loss.backward()
             optimizer.step()
@@ -136,13 +137,13 @@ class PyTorchBench:
             f['.']['time']['train_batch'][batch_count-1] = default_timer() - start
 
             # Save training loss and accuracy
-            f['.']['cost']['train'][batch_count-1] = np.float32(train_loss.data[0])
+            f['.']['cost']['train'][batch_count-1] = np.float32(train_loss.item())
             f['.']['accuracy']['train'][batch_count-1] = np.float32(acc)
 
             if batch_idx % 10 == 0:
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f},\tAccuracy: {}/{} ({:.0f}%)'.format(
                     epoch, batch_idx * len(data), len(train_set.dataset),\
-                    100. * batch_idx / len(train_set), train_loss.data[0],\
+                    100. * batch_idx / len(train_set), train_loss.item(),\
                     correct, len(data), acc))
 
         # Save batch marker
@@ -161,8 +162,8 @@ class PyTorchBench:
             data, target = Variable(data, requires_grad=False), Variable(target)
             output = torch_model(data)
             # output = torch_model.forward(data)
-            cost = torch.nn.CrossEntropyLoss(size_average=False)
-            valid_loss += cost(output, target).data[0] # sum up batch loss
+            cost = torch.nn.CrossEntropyLoss(reduction='sum')
+            valid_loss += cost(output, target).item() # sum up batch loss
             pred = output.data.max(1, keepdim=True)[1] # get the index of the max log-probability
             correct += pred.eq(target.data.view_as(pred)).cpu().sum()
 
@@ -202,6 +203,9 @@ class PyTorchBench:
         self.constructCNN(gpu=("gpu" in self.devices))
         max_total_batch = (len(self.x_train) // self.batch_size + 1) * self.epoch_num
 
+        # Common suffix
+        suffix = "pytorch_{}_{}by{}_{}".format(self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)
+
         # model_parameters = filter(lambda p: p.requires_grad, self.torch_model_cpu.parameters())
         # prm = sum([np.prod(p.size()) for p in model_parameters])
 
@@ -213,7 +217,7 @@ class PyTorchBench:
             torch_model = self.torch_model_gpu if use_gpu else self.torch_model_cpu
             optimizer = optim.SGD(torch_model.parameters(), lr=0.01, momentum=0.9)
 
-            filename = "./saved_data/{}/{}/callback_data_pytorch_{}_{}by{}_{}.h5".format(self.network_type, d, self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing)
+            filename = "./saved_data/{}/{}/callback_data_{}.h5".format(self.network_type, d, suffix)
             print(filename)
             f = DLHelper.init_h5py(filename, self.epoch_num, max_total_batch)
             try:
@@ -235,7 +239,7 @@ class PyTorchBench:
                 # Final test
                 self.valid(torch_model, optimizer, torch_test_set, f, use_gpu)
 
-                torch.save(torch_model, "./saved_models/{}/{}/pytorch_{}_{}by{}_{}.pth".format(self.network_type, d, self.dataset, self.resize_size[0], self.resize_size[1], self.preprocessing))
+                torch.save(torch_model, "./saved_models/{}/{}/{}.pth".format(self.network_type, d, suffix))
             except KeyboardInterrupt:
                 pass
             except Exception as e:
