@@ -1,5 +1,9 @@
-# TrafficSignBench
-A benchmark for deep learning frameworks on traffic sign recognition task
+## Classification
+Benchmarking popular deep learning frameworks, including CNTK, MXNet, Neon, Keras, PyTorch, and Tensorflow with models including
+- IDSIA (32x32) (http://people.idsia.ch/~ciresan/data/ijcnn2011.pdf)
+- ResNet-20 (32x32, 48x48, 64x64)
+- ResNet-32 (32x32, 48x48, 64x64) (https://arxiv.org/pdf/1512.03385.pdf)
+on a traffic sign dataset GTSRB (http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset).
 
 ## Usage:
 * Download the code and change working directory to the folder.
