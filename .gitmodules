@@ -4,3 +4,6 @@
 [submodule "Detection/incubator-mxnet"]
 	path = Detection/incubator-mxnet
 	url = https://github.com/moderato/incubator-mxnet
+[submodule "Detection/models"]
+	path = Detection/models
+	url = https://github.com/moderato/models

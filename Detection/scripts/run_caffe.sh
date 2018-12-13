@@ -1,3 +1,4 @@
+# for model_name in VGG MobileNet MobileNetV2; do
 for model_name in MobileNet; do
 	for batch in 1 4; do
 		for fp in FP11 FP16; do
