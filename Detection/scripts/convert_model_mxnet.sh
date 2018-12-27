@@ -50,4 +50,4 @@ else # ResNet32
 fi
 
 cd ../classification/mxnet
-python3 ../../mo_mxnet.py --input_model $model --input_shape [$batch,3,$size,$size] --data_type $precision --scale 255 --input data --reverse_input_channels
+python3 ../../mo_mxnet.py --input_model $model --input_shape [$batch,3,$size,$size] --output softmax --data_type $precision --scale 255 --reverse_input_channels

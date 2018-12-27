@@ -15,16 +15,31 @@ cd $OPENVINO_ROOTDIR/bin
 source setupvars.sh
 
 # Program the board
+# # R3
+# aocl program acl0 $OPENVINO_ROOTDIR/a10_devkit_bitstreams/2-0-1_A10DK_${fp}_Generic.aocx
+# export DLA_AOCX=$OPENVINO_ROOTDIR/a10_devkit_bitstreams/2-0-1_A10DK_${fp}_Generic.aocx
+
+# # R4
+# if [ "$fp" == "FP11" ]; then
+# 	aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP11_MobileNet_ResNet_VGG_Clamp.aocx
+# 	export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP11_MobileNet_ResNet_VGG_Clamp.aocx
+# # FP16
+# elif [ "$model_name" == "VGG" ]; then # VGG
+# 	aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_VGG_Generic.aocx
+# 	export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_VGG_Generic.aocx
+# else # Non-VGG
+# 	aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_MobileNet_ResNet_SqueezeNet_Clamp.aocx
+# 	export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_MobileNet_ResNet_SqueezeNet_Clamp.aocx
+# fi
+
+# R5
 if [ "$fp" == "FP11" ]; then
 	aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP11_MobileNet_ResNet_VGG_Clamp.aocx
 	export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP11_MobileNet_ResNet_VGG_Clamp.aocx
 # FP16
-elif [ "$model_name" == "VGG" ]; then # VGG
-	aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_VGG_Generic.aocx
-	export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_VGG_Generic.aocx
-else # Non-VGG
-	aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_MobileNet_ResNet_SqueezeNet_Clamp.aocx
-	export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_MobileNet_ResNet_SqueezeNet_Clamp.aocx
+else
+	aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP16_ResNet_TinyYolo.aocx
+	export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP16_ResNet_TinyYolo.aocx
 fi
 
 # # GTSDB
@@ -51,5 +66,5 @@ else # ResNet32
 	model=deploy_resnet-32_mxnet_GT_${size}by${size}_3-0025.xml
 fi
 
-cd $OPENVINO_ROOTDIR/deployment_tools/model_optimizer_R3/classification/mxnet
+cd $OPENVINO_ROOTDIR/deployment_tools/model_optimizer/classification/mxnet
 $OPENVINO_ROOTDIR/deployment_tools/inference_engine/samples/build/intel64/Release/validation_app -t C -i $HOME/Documents/data/GTSRB/Final_Test/pp_imgs_clahe_${size}_${size}/labels.txt -m $model -d HETERO:FPGA,CPU

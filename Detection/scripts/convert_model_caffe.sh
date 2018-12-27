@@ -36,6 +36,5 @@ fi
 # iter=50000
 # model=${model_name}_SSD_510x300_100_40_Square_1_${iter}.caffemodel
 
-
 cd ../gtsdb/caffe/${model_name}
-python3 ../../../mo.py --input_model $model --mean_values [125,127,130] --input_shape [$batch,3,300,510] --data_type $precision | grep -e abc
+python3 ../../../mo.py --input_model $model --mean_values [125,127,130] --input_shape [$batch,3,300,510] --data_type $precision # | grep -e abc

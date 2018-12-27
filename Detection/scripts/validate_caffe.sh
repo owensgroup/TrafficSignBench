@@ -14,21 +14,37 @@ printf $"Args: ${fp}, ${model_name}\n"
 cd $OPENVINO_ROOTDIR/bin
 source setupvars.sh
 
-# # SSD512
-# cd $OPENVINO_ROOTDIR/deployment_tools/model_optimizer/ssd/caffe/ssd_vgg_512
-# $OPENVINO_ROOTDIR/deployment_tools/inference_engine/samples/build/intel64/Release/benchmark_app -i $HOME/Documents/data/VOCdevkit/VOC2007/JPEGImages -m ssd512.xml -d CPU -api async
+# # Program the board
+# if [ "$fp" == "FP11" ]; then
+# 	aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP11_MobileNet_ResNet_VGG_Clamp.aocx
+# 	export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP11_MobileNet_ResNet_VGG_Clamp.aocx
+# # FP16
+# elif [ "$model_name" == "VGG" ]; then # VGG
+# 	aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_VGG_Generic.aocx
+# 	export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_VGG_Generic.aocx
+# else # Non-VGG
+# 	aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_MobileNet_ResNet_SqueezeNet_Clamp.aocx
+# 	export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_MobileNet_ResNet_SqueezeNet_Clamp.aocx
+# fi
 
-# Program the board
+# R5
 if [ "$fp" == "FP11" ]; then
-	aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP11_MobileNet_ResNet_VGG_Clamp.aocx
-	export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP11_MobileNet_ResNet_VGG_Clamp.aocx
+	if [ "$model_name" == "VGG" ]; then
+		aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP11_VGG.aocx
+		export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP11_VGG.aocx
+	else
+		aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP11_MobileNet_Clamp.aocx
+		export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP11_MobileNet_Clamp.aocx
+	fi
 # FP16
-elif [ "$model_name" == "VGG" ]; then # VGG
-	aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_VGG_Generic.aocx
-	export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_VGG_Generic.aocx
-else # Non-VGG
-	aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_MobileNet_ResNet_SqueezeNet_Clamp.aocx
-	export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_MobileNet_ResNet_SqueezeNet_Clamp.aocx
+else
+	if [ "$model_name" == "VGG" ]; then
+		aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP16_Generic.aocx
+		export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP16_Generic.aocx
+	else
+		aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP16_MobileNet_Clamp.aocx
+		export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP16_MobileNet_Clamp.aocx
+	fi
 fi
 
 # GTSDB
