@@ -3,6 +3,7 @@ batch=$2
 precision=$3
 if [ -z "$model_name" ]
 then
+	# model_name="ResNet20"
 	model_name="VGG"
 fi
 if [ -z "$batch" ]
