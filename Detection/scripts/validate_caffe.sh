@@ -2,50 +2,49 @@ fp=$1
 model_name=$2
 if [ -z "$fp" ]
 then
-	fp="FP11"
+	fp="FP16"
 fi
 if [ -z "$model_name" ]
 then
 	model_name="VGG"
 fi
-printf $"Args: ${fp}, ${model_name}\n"
 
 # Set up variables
 cd $OPENVINO_ROOTDIR/bin
 source setupvars.sh
 
 # # Program the board
+# # R4
+# aocx="4-0_A10DK_FP16_VGG_Generic.aocx"
 # if [ "$fp" == "FP11" ]; then
-# 	aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP11_MobileNet_ResNet_VGG_Clamp.aocx
-# 	export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP11_MobileNet_ResNet_VGG_Clamp.aocx
+# 	aocx="4-0_A10DK_FP11_MobileNet_ResNet_VGG_Clamp.aocx"
 # # FP16
 # elif [ "$model_name" == "VGG" ]; then # VGG
-# 	aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_VGG_Generic.aocx
-# 	export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_VGG_Generic.aocx
+# 	aocx="4-0_A10DK_FP16_VGG_Generic.aocx"
 # else # Non-VGG
-# 	aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_MobileNet_ResNet_SqueezeNet_Clamp.aocx
-# 	export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_MobileNet_ResNet_SqueezeNet_Clamp.aocx
+# 	aocx="4-0_A10DK_FP16_MobileNet_ResNet_SqueezeNet_Clamp.aocx"
 # fi
-
 # R5
+aocx="5-0_A10DK_FP16_Generic.aocx"
 if [ "$fp" == "FP11" ]; then
 	if [ "$model_name" == "VGG" ]; then
-		aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP11_VGG.aocx
-		export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP11_VGG.aocx
+		aocx="5-0_A10DK_FP11_VGG.aocx"
 	else
-		aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP11_MobileNet_Clamp.aocx
-		export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP11_MobileNet_Clamp.aocx
+		aocx="5-0_A10DK_FP11_MobileNet_Clamp.aocx"
 	fi
 # FP16
 else
 	if [ "$model_name" == "VGG" ]; then
-		aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP16_Generic.aocx
-		export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP16_Generic.aocx
+		aocx="5-0_A10DK_FP16_SqueezeNet_VGG.aocx"
 	else
-		aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP16_MobileNet_Clamp.aocx
-		export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP16_MobileNet_Clamp.aocx
+		aocx="5-0_A10DK_FP16_MobileNet_Clamp.aocx"
 	fi
 fi
+
+aocl program acl0 "${OPENVINO_ROOTDIR}/bitstreams/a10_devkit_bitstreams/${aocx}"
+export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/$aocx
+
+printf $"Args: ${fp}, ${model_name}, ${aocx}\n"
 
 # GTSDB
 if [ "$model_name" == "VGG" ]; then

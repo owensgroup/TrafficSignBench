@@ -5,31 +5,27 @@ source setupvars.sh
 # Program the board
 ############################# R4
 # FP11
-# aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP11_MobileNet_ResNet_VGG_Clamp.aocx
-# export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP11_MobileNet_ResNet_VGG_Clamp.aocx
+# aocx="4-0_A10DK_FP11_MobileNet_ResNet_VGG_Clamp.aocx"
 # FP16
 # # VGG
-# aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_VGG_Generic.aocx
-# export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_VGG_Generic.aocx
+# aocx="4-0_A10DK_FP16_VGG_Generic.aocx"
 # # Non-VGG
-# aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_MobileNet_ResNet_SqueezeNet_Clamp.aocx
-# export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/4-0_A10DK_FP16_MobileNet_ResNet_SqueezeNet_Clamp.aocx
+# aocx="4-0_A10DK_FP16_MobileNet_ResNet_SqueezeNet_Clamp.aocx"
 
 ############################## R5
 # FP11
 # # VGG
-# aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP11_VGG.aocx
-# export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP11_VGG.aocx
+# aocx="5-0_A10DK_FP11_VGG.aocx"
 # # Non-VGG
-# aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP11_MobileNet_Clamp.aocx
-# export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP11_MobileNet_Clamp.aocx
+# aocx="5-0_A10DK_FP11_MobileNet_Clamp.aocx"
 # FP16
 # # VGG
-# aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP16_Generic.aocx
-# export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP16_Generic.aocx
+# aocx="5-0_A10DK_FP16_SqueezeNet_VGG.aocx"
 # # Non-VGG
-aocl program acl0 $OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP16_MobileNet_Clamp.aocx
-export DLA_AOCX=$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/5-0_A10DK_FP16_MobileNet_Clamp.aocx
+aocx="5-0_A10DK_FP16_MobileNet_Clamp.aocx"
+
+aocl program acl0 "${OPENVINO_ROOTDIR}/bitstreams/a10_devkit_bitstreams/${aocx}"
+export DLA_AOCX="$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/${aocx}"
 
 # Run inference tool
 # GoogleNet
