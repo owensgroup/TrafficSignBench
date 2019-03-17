@@ -1,4 +1,5 @@
-for model_name in VGG MobileNet MobileNetV2; do
+# for model_name in VGG MobileNet MobileNetV2 ResNet18 ResNet50; do
+for model_name in ResNet18 ResNet50; do
 	for batch in 1 4; do
 # for model_name in ResNet20 ResNet32; do
 # 	for batch in 1 32; do

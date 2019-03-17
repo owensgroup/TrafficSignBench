@@ -9,7 +9,7 @@ then
 	# model_name="ResNet20"
 	model_name="MobileNetV2"
 fi
-if [ "$model_name" == "MobileNet" ] || [ "$model_name" == "MobileNetV2" ]; then 
+if [ "$model_name" == "VGG16" ] || [ "$model_name" == "MobileNet" ] || [ "$model_name" == "MobileNetV2" ] || [ "$model_name" == "ResNet18" ] || [ "$model_name" == "ResNet50" ] || [ "$model_name" == "SqueezeNet11" ] ; then 
 	type="detection"
 else
 	type="classification"
@@ -30,16 +30,22 @@ source setupvars.sh
 # R5
 aocx="5-0_A10DK_FP16_Generic.aocx"
 if [ "$fp" == "FP11" ]; then
-	if [ "$model_name" == "MobileNet" ] || [ "$model_name" == "MobileNetV2" ]; then
+	if [ "$model_name" == "VGG16" ]; then
+		aocx="5-0_A10DK_FP11_VGG.aocx"
+	elif [ "$model_name" == "MobileNet" ] || [ "$model_name" == "MobileNetV2" ]; then
 		aocx="5-0_A10DK_FP11_MobileNet_Clamp.aocx"
-	else # ResNet
-		aocx="5-0_A10DK_FP11_ResNet.aocx"
+	elif [ "$model_name" == "ResNet18" ] || [ "$model_name" == "ResNet50" ]; then
+		aocx="5-0_A10DK_FP11_ResNet18.aocx"
+	else # SqueezeNet v1.1
+		aocx="5-0_A10DK_FP11_SqueezeNet.aocx"
 	fi
 # FP16
 else
-	if [ "$model_name" == "MobileNet" ] || [ "$model_name" == "MobileNetV2" ]; then
+	if [ "$model_name" == "VGG16" ] || [ "$model_name" == "SqueezeNet11" ]; then
+		aocx="5-0_A10DK_FP16_SqueezeNet_VGG.aocx"
+	elif [ "$model_name" == "MobileNet" ] || [ "$model_name" == "MobileNetV2" ]; then
 		aocx="5-0_A10DK_FP16_MobileNet_Clamp.aocx"
-	else
+	else # ResNet18/50
 		aocx="5-0_A10DK_FP16_ResNet_TinyYolo.aocx"
 	fi
 fi
@@ -50,15 +56,6 @@ export DLA_AOCX="$OPENVINO_ROOTDIR/bitstreams/a10_devkit_bitstreams/${aocx}"
 printf $"Args: ${fp}, ${model_name}, ${aocx}\n"
 
 if [ "$type" == "detection" ]; then
-	# GTSDB
-	if [ "$model_name" == "MobileNet" ]; then
-		iter=120000
-		model=${model_name}_SSD_510x300_100_40_Square_1_${iter}.xml
-	else # MobileNetV2
-		iter=200000
-		model=${model_name}_SSDLite_510x300_100_40_Square_1_${iter}.xml
-	fi
-
 	cd $OPENVINO_ROOTDIR/deployment_tools/model_optimizer_R3/gtsdb/tf/${model_name}
 	$OPENVINO_ROOTDIR/deployment_tools/inference_engine/samples/build/intel64/Release/validation_app -t OD -ODa $HOME/Documents/data/GTSDBdevkit/GTSDB/Annotations/test -i $HOME/Documents/data/GTSDBdevkit -m frozen_inference_graph.xml -ODc $HOME/Documents/data/GTSDB_SSD_Classes_tf.txt -ODsubdir JPEGImages/test -d HETERO:FPGA,CPU
 else # classification

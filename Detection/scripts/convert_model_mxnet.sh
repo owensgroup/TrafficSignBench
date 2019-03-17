@@ -14,7 +14,7 @@ if [ -z "$precision" ]
 then
 	precision="half"
 fi
-if [ "$model_name" == "VGG" ] || [ "$model_name" == "MobileNet" ] || [ "$model_name" == "MobileNetV2" ]; then 
+if [ "$model_name" == "VGG" ] || [ "$model_name" == "MobileNet" ] || [ "$model_name" == "MobileNetV2" ] || [ "$model_name" == "ResNet18" ] || [ "$model_name" == "ResNet50" ]; then 
 	type="detection"
 else
 	type="classification"
@@ -37,8 +37,12 @@ if [ "$type" == "detection" ]; then
 		model=deploy_gtsdb_ssd_vgg16_reduced_300_510-0102.params
 	elif [ "$model_name" == "MobileNet" ]; then
 		model=deploy_gtsdb_ssd_mobilenet_v1_300_510-0102.params
-	else # MobileNetV2
+	elif [ "$model_name" == "MobileNetV2" ]; then
 		model=deploy_gtsdb_ssdlite_mobilenet_v2_300_510-0204.params
+	elif [ "$model_name" == "ResNet18" ]; then
+		model=deploy_gtsdb_ssd_resnet18_300_510-0136.params
+	else # ResNet50
+		model=deploy_gtsdb_ssd_resnet50_300_510-0102.params
 	fi
 
 	# model=deploy_gtsdb_ssd_mobilenet_v2_300_510-0102.params

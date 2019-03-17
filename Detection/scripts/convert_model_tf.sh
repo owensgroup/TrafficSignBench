@@ -14,7 +14,7 @@ if [ -z "$precision" ]
 then
 	precision="float"
 fi
-if [ "$model_name" == "VGG" ] || [ "$model_name" == "MobileNet" ] || [ "$model_name" == "MobileNetV2" ]; then 
+if [ "$model_name" == "VGG16" ] || [ "$model_name" == "MobileNet" ] || [ "$model_name" == "MobileNetV2" ] || [ "$model_name" == "ResNet18" ] || [ "$model_name" == "ResNet50" ] || [ "$model_name" == "SqueezeNet11" ] ; then 
 	type="detection"
 else
 	type="classification"
@@ -29,16 +29,7 @@ cd $OPENVINO_ROOTDIR/deployment_tools/model_optimizer_R3/install_prerequisites
 # ./install_prerequisites.sh tf venv
 source ../venv/bin/activate
 
-
 if [ "$type" == "detection" ]; then
-	# GTSDB, no VGG for TF
-	if [ "$model_name" == "MobileNet" ]; then
-		iter=120000
-		model=${model_name}_SSD_510x300_100_40_Square_1_${iter}.meta
-	else # MobileNetV2
-		iter=200000
-		model=${model_name}_SSDLite_510x300_100_40_Square_1_${iter}.meta
-	fi
 	cd ../gtsdb/tf/${model_name}
 	python ../../../mo_tf.py --input_model frozen_inference_graph.pb --output="detection_boxes,detection_scores,num_detections" --data_type $precision --reverse_input_channels --input_shape [$batch,300,510,3] --tensorflow_object_detection_api_pipeline_config pipeline.config --tensorflow_use_custom_operations_config ../../../extensions/front/tf/ssd_v2_support.json | grep abc
 else # classification

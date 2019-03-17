@@ -29,15 +29,21 @@ aocx="5-0_A10DK_FP16_Generic.aocx"
 if [ "$fp" == "FP11" ]; then
 	if [ "$model_name" == "VGG" ]; then
 		aocx="5-0_A10DK_FP11_VGG.aocx"
-	else
+	elif [ "$model_name" == "MobileNet" ] || [ "$model_name" == "MobileNetV2" ]; then
 		aocx="5-0_A10DK_FP11_MobileNet_Clamp.aocx"
+	elif [ "$model_name" == "ResNet18" ] || [ "$model_name" == "ResNet50" ]; then
+		aocx="5-0_A10DK_FP11_ResNet18.aocx"
+	else # SqueezeNet v1.1
+		aocx="5-0_A10DK_FP11_SqueezeNet.aocx"
 	fi
 # FP16
 else
-	if [ "$model_name" == "VGG" ]; then
+	if [ "$model_name" == "VGG" ] || [ "$model_name" == "SqueezeNet11" ]; then
 		aocx="5-0_A10DK_FP16_SqueezeNet_VGG.aocx"
-	else
+	elif [ "$model_name" == "MobileNet" ] || [ "$model_name" == "MobileNetV2" ]; then
 		aocx="5-0_A10DK_FP16_MobileNet_Clamp.aocx"
+	else # ResNet18/50
+		aocx="5-0_A10DK_FP16_ResNet_TinyYolo.aocx"
 	fi
 fi
 
@@ -48,14 +54,15 @@ printf $"Args: ${fp}, ${model_name}, ${aocx}\n"
 
 # GTSDB
 if [ "$model_name" == "VGG" ]; then
-	iter=30000
-	model=${model_name}_SSD_510x300_100_40_Square_${iter}.xml
+	model=${model_name}_SSD_510x300_100_40_Square_30000.xml
 elif [ "$model_name" == "MobileNet" ]; then
-	iter=120000
-	model=${model_name}_SSD_510x300_100_40_Square_1_${iter}.xml
-else # MobileNetV2
-	iter=200000
-	model=${model_name}_SSDLite_510x300_100_40_Square_1_${iter}.xml
+	model=${model_name}_SSD_510x300_100_40_Square_1_120000.xml
+elif [ "$model_name" == "MobileNetV2" ]; then
+	model=${model_name}_SSDLite_510x300_100_40_Square_1_200000.xml
+elif [ "$model_name" == "ResNet18" ] || [ "$model_name" == "ResNet50" ]; then
+	model=${model_name}_SSD_510x300_100_40_Square_1_80000.xml
+else
+	model=${model_name}_SSD_510x300_100_40_Square_1_10000.xml
 fi
 
 # model_name=MobileNetV2

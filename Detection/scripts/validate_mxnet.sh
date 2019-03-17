@@ -8,7 +8,7 @@ if [ -z "$model_name" ]
 then
 	model_name="VGG"
 fi
-if [ "$model_name" == "VGG" ] || [ "$model_name" == "MobileNet" ] || [ "$model_name" == "MobileNetV2" ]; then 
+if [ "$model_name" == "VGG" ] || [ "$model_name" == "MobileNet" ] || [ "$model_name" == "MobileNetV2" ] || [ "$model_name" == "ResNet18" ] || [ "$model_name" == "ResNet50" ]; then 
 	type="detection"
 else
 	type="classification"
@@ -37,7 +37,7 @@ if [ "$fp" == "FP11" ]; then
 	elif [ "$model_name" == "MobileNet" ] || [ "$model_name" == "MobileNetV2" ]; then
 		aocx="5-0_A10DK_FP11_MobileNet_Clamp.aocx"
 	else # ResNet
-		aocx="5-0_A10DK_FP11_ResNet.aocx"
+		aocx="5-0_A10DK_FP11_ResNet18.aocx"
 	fi
 # FP16
 else
@@ -61,8 +61,12 @@ if [ "$type" == "detection" ]; then
 		model=deploy_gtsdb_ssd_vgg16_reduced_300_510-0102.xml
 	elif [ "$model_name" == "MobileNet" ]; then
 		model=deploy_gtsdb_ssd_mobilenet_v1_300_510-0102.xml
-	else # MobileNetV2
+	elif [ "$model_name" == "MobileNetV2" ]; then
 		model=deploy_gtsdb_ssdlite_mobilenet_v2_300_510-0204.xml
+	elif [ "$model_name" == "ResNet18" ]; then
+		model=deploy_gtsdb_ssd_resnet18_300_510-0136.xml
+	else # ResNet50
+		model=deploy_gtsdb_ssd_resnet50_300_510-0102.xml
 	fi
 	# model=deploy_gtsdb_ssd_mobilenet_v2_300_510-0102.xml
 	cd $OPENVINO_ROOTDIR/deployment_tools/model_optimizer/gtsdb/mxnet
